@@ -468,18 +468,16 @@ export function Carousel({ tuning, isPaused }: CarouselProps) {
     );
   };
 
-  return (
-    <div
-      className={`relative flex h-full w-full flex-col items-center justify-center overflow-hidden select-none ${
-        showPhoneFrame ? 'border-[10px] border-neutral-800 bg-black' : ''
-      }`}
-      style={showPhoneFrame ? { borderRadius: 48 } : undefined}
-    >
+  const screen = (
+    <div className="relative flex h-full w-full flex-col overflow-hidden select-none">
       {showPhoneFrame && (
-        <div className="relative z-40 flex w-full shrink-0 items-center justify-between px-6 pt-3 text-[11px] font-semibold text-neutral-400 select-none">
+        <div className="relative z-40 flex w-full shrink-0 items-center justify-between px-7 pt-3 text-[13px] font-semibold text-white select-none">
           <span>9:41</span>
-          <div className="h-5 w-24 rounded-full border border-neutral-800/80 bg-neutral-900" />
-          <span className="text-[10px]">5G</span>
+          <div className="absolute top-2 left-1/2 h-7 w-[108px] -translate-x-1/2 rounded-full bg-black" />
+          <span className="flex items-center gap-1.5 text-[11px]">
+            5G
+            <span className="h-3 w-6 rounded-[3px] border border-white/70" />
+          </span>
         </div>
       )}
 
@@ -532,10 +530,35 @@ export function Carousel({ tuning, isPaused }: CarouselProps) {
       </div>
 
       {showPhoneFrame && (
-        <div className="z-40 flex w-full shrink-0 justify-center pb-2.5 select-none">
-          <div className="h-1 w-28 rounded-full bg-neutral-600/60" />
+        <div className="z-40 flex w-full shrink-0 justify-center pb-2 select-none">
+          <div className="h-1 w-28 rounded-full bg-neutral-500/70" />
         </div>
       )}
+    </div>
+  );
+
+  if (!showPhoneFrame) return screen;
+
+  return (
+    <div className="flex h-full w-full items-center justify-center bg-neutral-950/40">
+      <div
+        className="relative flex-shrink-0 bg-neutral-900 shadow-[0_30px_80px_rgba(0,0,0,0.6)]"
+        style={{
+          aspectRatio: '9.5 / 19.5',
+          height: '90%',
+          maxHeight: '100%',
+          maxWidth: '100%',
+          borderRadius: 54,
+          border: '12px solid #1c1c1e',
+        }}
+      >
+        {/* Side button nubs */}
+        <div className="absolute top-[108px] -left-[2px] h-16 w-[3px] rounded-l-sm bg-[#1c1c1e]" />
+        <div className="absolute top-[180px] -left-[2px] h-10 w-[3px] rounded-l-sm bg-[#1c1c1e]" />
+        <div className="absolute top-[140px] -right-[2px] h-20 w-[3px] rounded-r-sm bg-[#1c1c1e]" />
+
+        <div className="relative h-full w-full overflow-hidden rounded-[42px] bg-black">{screen}</div>
+      </div>
     </div>
   );
 }

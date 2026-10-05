@@ -23,15 +23,15 @@ export function ControlsPanel() {
 
   if (!entry) {
     return (
-      <aside className="w-[var(--panel-width)] border-l border-border bg-panel p-4">
+      <aside className="h-full w-[var(--panel-width)] shrink-0 overflow-hidden border-l border-border bg-panel p-4">
         <p className="text-[12px] text-muted">Select an animation to edit its parameters.</p>
       </aside>
     );
   }
 
   return (
-    <aside className="scrollbar-thin h-full w-[var(--panel-width)] overflow-y-auto border-l border-border bg-panel px-5 py-5">
-      <div className="flex flex-col gap-5">
+    <aside className="scrollbar-thin h-full w-[var(--panel-width)] shrink-0 overflow-x-hidden overflow-y-auto border-l border-border bg-panel px-5 py-5">
+      <div className="flex flex-col gap-5 min-w-0 max-w-full">
         <ControlList
           controls={entry.schema}
           values={values}
@@ -42,7 +42,9 @@ export function ControlsPanel() {
           Reset to defaults
         </Button>
       </div>
-      <PanelSlot />
+      <div className="min-w-0 max-w-full">
+        <PanelSlot />
+      </div>
     </aside>
   );
 }
@@ -59,7 +61,7 @@ function ControlList({
   onChangeMany: (patch: ParamValues) => void;
 }) {
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 min-w-0 max-w-full">
       {controls.map((control) => {
         if (control.visibleWhen && !control.visibleWhen(values)) return null;
 
@@ -151,7 +153,7 @@ function ParamField({
       );
     case 'segmented':
       return (
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-col gap-1.5 min-w-0 max-w-full">
           <span className="text-[12px] text-muted">{control.label}</span>
           <Segmented
             options={control.options}

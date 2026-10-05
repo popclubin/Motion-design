@@ -28,11 +28,11 @@ export default function EditorPage() {
     <div className="grid h-screen grid-rows-[var(--top-bar-height)_1fr] overflow-hidden bg-bg">
       <TopBar />
       <div className="relative flex overflow-hidden">
-        <div className="hidden lg:block">
+        <div className="hidden shrink-0 h-full overflow-hidden lg:block">
           <AnimationSidebar />
         </div>
         <Stage />
-        <div className="hidden lg:block">
+        <div className="hidden shrink-0 h-full overflow-hidden lg:block">
           <ControlsPanel />
         </div>
 
@@ -53,7 +53,7 @@ export default function EditorPage() {
 
         {sidebarOpen && (
           <div className="absolute inset-0 z-40 flex lg:hidden">
-            <div className="relative">
+            <div className="relative shrink-0 h-full overflow-hidden">
               <AnimationSidebar />
               <IconButton
                 aria-label="Close animation list"
@@ -70,7 +70,7 @@ export default function EditorPage() {
         {panelOpen && (
           <div className="absolute inset-0 z-40 flex justify-end lg:hidden">
             <div className="flex-1 bg-black/50" onClick={() => setPanelOpen(false)} />
-            <div className="relative">
+            <div className="relative shrink-0 h-full overflow-hidden">
               <ControlsPanel />
               <IconButton
                 aria-label="Close parameters"

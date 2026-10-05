@@ -52,22 +52,33 @@ export interface AnimationComponentProps {
 }
 `;
 
-export const SUPPORT_CONTROLS_PORTAL_TSX = `import { createContext, useContext, useState } from 'react';
+export const SUPPORT_CONTROLS_PORTAL_TSX = `import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 
-const PanelSlotContext = createContext(null);
+// Module-level pub-sub, not React context: PanelSlot and ControlsPortal are
+// siblings in the layout, not ancestor/descendant, so context wouldn't reach.
+let currentSlot = null;
+const listeners = new Set();
+
+function publish(node) {
+  currentSlot = node;
+  listeners.forEach((listener) => listener(node));
+}
 
 export function PanelSlot() {
-  const [node, setNode] = useState(null);
-  return (
-    <PanelSlotContext.Provider value={node}>
-      <div ref={setNode} data-panel-slot="" />
-    </PanelSlotContext.Provider>
-  );
+  return <div ref={(node) => publish(node)} data-panel-slot="" />;
 }
 
 export function ControlsPortal({ children }) {
-  const node = useContext(PanelSlotContext);
+  const [node, setNode] = useState(currentSlot);
+
+  useEffect(() => {
+    listeners.add(setNode);
+    return () => {
+      listeners.delete(setNode);
+    };
+  }, []);
+
   if (!node) return null;
   return createPortal(children, node);
 }

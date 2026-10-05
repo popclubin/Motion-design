@@ -35,7 +35,7 @@ function ParamField({ control, value, onChange, onChangeMany }) {
       return <Select label={control.label} value={String(value ?? control.default)} options={control.options} onChange={onChange} />;
     case 'segmented':
       return (
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-col gap-1.5 min-w-0 max-w-full">
           <span className="text-[12px] text-muted">{control.label}</span>
           <Segmented
             options={control.options}

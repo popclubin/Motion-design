@@ -1,6 +1,7 @@
 import type { ParamSchema } from '../_core/params';
 
 const schema: ParamSchema = [
+  { key: 'showPhoneFrame', type: 'toggle', label: 'Show phone frame', default: true },
   {
     key: 'snapSymmetry',
     type: 'group',
@@ -78,7 +79,6 @@ const schema: ParamSchema = [
       { key: 'cardWidth', type: 'slider', label: 'Card width', default: 118, min: 90, max: 360, step: 1, unit: 'px' },
       { key: 'perspective', type: 'slider', label: 'Stage perspective', default: 1900, min: 350, max: 1900, step: 25, unit: 'px' },
       { key: 'tiltX', type: 'slider', label: 'Stage tilt (pitch)', default: 35, min: -35, max: 35, step: 1, unit: '°' },
-      { key: 'showPhoneFrame', type: 'toggle', label: 'Show phone frame', default: true },
     ],
   },
   {

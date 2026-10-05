@@ -6,5 +6,25 @@
     "/animations/infinite-card-carousel/cards/icici_vertical.png",
     "/animations/infinite-card-carousel/cards/kotak_vertical.png",
     "/animations/infinite-card-carousel/cards/sbi_vertical.png"
+  ],
+  "payment-phone-screen": [
+    "/animations/payment-phone-screen/font.otf"
+  ],
+  "tinder-swipe": [
+    "/animations/tinder-swipe/chat-bg.jpg",
+    "/animations/tinder-swipe/fonts/AwesomeSerifItalic-Bold.otf",
+    "/animations/tinder-swipe/fonts/AwesomeSerifItalic-Regular.otf",
+    "/animations/tinder-swipe/fonts/figtree-latin-ext.woff2",
+    "/animations/tinder-swipe/fonts/figtree-latin.woff2",
+    "/animations/tinder-swipe/pop-coin.png",
+    "/animations/tinder-swipe/swipe.svg",
+    "/animations/tinder-swipe/trend-cargo.jpg",
+    "/animations/tinder-swipe/trend-knits.jpg",
+    "/animations/tinder-swipe/trend-sandals.jpg",
+    "/animations/tinder-swipe/trend-skincare.jpg"
+  ],
+  "upi-card-flip": [
+    "/animations/upi-card-flip/avatar.jpg",
+    "/animations/upi-card-flip/qr-bg.png"
   ]
 }
