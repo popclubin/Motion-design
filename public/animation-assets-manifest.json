@@ -1,0 +1,10 @@
+{
+  "infinite-card-carousel": [
+    "/animations/infinite-card-carousel/cards/POPcard_vertical.png",
+    "/animations/infinite-card-carousel/cards/axis_vertical.png",
+    "/animations/infinite-card-carousel/cards/hdfc_vertical.png",
+    "/animations/infinite-card-carousel/cards/icici_vertical.png",
+    "/animations/infinite-card-carousel/cards/kotak_vertical.png",
+    "/animations/infinite-card-carousel/cards/sbi_vertical.png"
+  ]
+}
