@@ -66,13 +66,6 @@ export function AvatarMenu() {
             >
               Hub
             </Link>
-            <Link
-              to="/"
-              onClick={() => setOpen(false)}
-              className="block rounded-sm px-2.5 py-1.5 text-[13px] text-text hover:bg-raised"
-            >
-              Landing page
-            </Link>
             {profile?.role === 'admin' && (
               <Link
                 to="/admin"

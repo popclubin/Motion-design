@@ -22,7 +22,7 @@ export default function HubPage() {
     <div className="flex min-h-screen flex-col bg-bg text-text">
       <header className="flex h-[var(--top-bar-height)] items-center justify-between border-b border-border bg-panel px-4 sm:px-6">
         <div className="flex items-center gap-2">
-          <Link to="/" className="text-[14px] font-semibold text-text hover:text-accent transition-colors">
+          <Link to="/hub" className="text-[14px] font-semibold text-text hover:text-accent transition-colors">
             Motion Library
           </Link>
           <Pill>Beta</Pill>
