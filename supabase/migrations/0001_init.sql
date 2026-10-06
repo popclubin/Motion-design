@@ -109,12 +109,10 @@ create table public.animation_meta (
 
 alter table public.animation_meta enable row level security;
 
-create policy "animation_meta_select_published"
+create policy "animation_meta_select_all"
   on public.animation_meta for select
   to authenticated
-  using (is_published or exists (
-    select 1 from public.profiles where id = auth.uid() and role = 'admin'
-  ));
+  using (true);
 
 create policy "animation_meta_admin_write"
   on public.animation_meta for all

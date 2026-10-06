@@ -3,6 +3,8 @@ import { ChevronLeft, ChevronRight, Menu, SlidersHorizontal, X } from 'lucide-re
 import { Navigate, useParams } from 'react-router';
 import { IconButton } from '../components/ui/IconButton';
 import { animationRegistry } from '../animations/registry';
+import { useAuth } from '../features/auth/AuthProvider';
+import { useAnimationCatalog } from '../features/editor/animationCatalog';
 import { AnimationSidebar } from '../features/editor/AnimationSidebar';
 import { ControlsPanel } from '../features/editor/ControlsPanel';
 import { Stage } from '../features/editor/Stage';
@@ -11,6 +13,9 @@ import { useEditorStore } from '../features/editor/editorStore';
 
 export default function EditorPage() {
   const { slug } = useParams();
+  const { profile } = useAuth();
+  const isAdmin = profile?.role === 'admin';
+  const { entries: allEntries, isLoading: isCatalogLoading } = useAnimationCatalog();
   const setActiveSlug = useEditorStore((s) => s.setActiveSlug);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
@@ -22,8 +27,13 @@ export default function EditorPage() {
   }, [slug, setActiveSlug]);
 
   if (!slug) {
-    const first = animationRegistry[0];
-    return first ? <Navigate to={`/editor/${first.manifest.slug}`} replace /> : null;
+    const targetSlug = allEntries[0]?.slug ?? animationRegistry[0]?.manifest.slug ?? null;
+    return targetSlug ? <Navigate to={`/editor/${targetSlug}`} replace /> : null;
+  }
+
+  // If catalog has loaded, user is not admin, and the animation is not in published entries, redirect to first published
+  if (!isCatalogLoading && !isAdmin && allEntries.length > 0 && !allEntries.some((e) => e.slug === slug)) {
+    return <Navigate to={`/editor/${allEntries[0].slug}`} replace />;
   }
 
   return (
