@@ -21,7 +21,7 @@ function writeStoredParams(paramsBySlug: Record<string, ParamValues>) {
   }
 }
 
-function defaultParamsFor(slug: string): ParamValues {
+export function defaultParamsFor(slug: string): ParamValues {
   const entry = getAnimationEntry(slug);
   return entry ? defaultValuesFromSchema(entry.schema) : {};
 }

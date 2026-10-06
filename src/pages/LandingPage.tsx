@@ -1,5 +1,5 @@
-import { LayoutDashboard, Shield } from 'lucide-react';
-import { Link, Navigate } from 'react-router';
+import { Shield } from 'lucide-react';
+import { Link } from 'react-router';
 import { Button } from '../components/ui/Button';
 import { Pill } from '../components/ui/Pill';
 import { Spinner } from '../components/ui/Spinner';
@@ -10,16 +10,12 @@ export default function LandingPage() {
   const { session, profile, isLoading, isProfileLoading, signOut } = useAuth();
   const isAdmin = profile?.role === 'admin';
 
-  if (session && isProfileLoading) {
+  if (isLoading || (session && isProfileLoading)) {
     return (
       <div className="flex h-screen items-center justify-center bg-bg">
         <Spinner />
       </div>
     );
-  }
-
-  if (session && !isAdmin) {
-    return <Navigate to="/editor" replace />;
   }
 
   return (
@@ -30,8 +26,21 @@ export default function LandingPage() {
           <Pill>Beta</Pill>
         </div>
         <div className="flex items-center gap-3">
-          {!isLoading && session ? (
+          {session ? (
             <>
+              <Link to="/hub">
+                <Button variant="secondary" className="text-[13px]">
+                  Open Library
+                </Button>
+              </Link>
+              {isAdmin && (
+                <Link to="/admin">
+                  <Button variant="ghost" className="gap-1.5 text-[13px]">
+                    <Shield size={14} className="text-accent" />
+                    Admin
+                  </Button>
+                </Link>
+              )}
               <span className="hidden text-[13px] text-muted sm:inline">{session.user.email}</span>
               <Button variant="ghost" onClick={() => void signOut()}>
                 Sign out
@@ -46,48 +55,29 @@ export default function LandingPage() {
         </div>
       </header>
 
-      {!isLoading && session ? (
-        <section className="dotted-grid flex flex-1 flex-col items-center justify-center gap-6 px-6 py-20 text-center">
-          <h1 className="text-[28px] font-semibold">Where do you want to go?</h1>
-          <div className={`grid w-full max-w-2xl gap-4 ${isAdmin ? 'sm:grid-cols-2' : 'sm:grid-cols-1'}`}>
-            <Link
-              to="/editor"
-              className="flex flex-col items-center gap-3 rounded-[var(--radius-lg)] border border-border bg-panel p-8 transition-colors hover:border-accent"
-            >
-              <LayoutDashboard size={24} className="text-accent" />
-              <span className="text-[15px] font-semibold">User panel</span>
-              <span className="text-[13px] text-muted">
-                Browse, tune, and export animations as {session.user.email}.
-              </span>
+      <section className="dotted-grid flex flex-1 flex-col items-center justify-center gap-6 px-6 py-24 text-center">
+        <h1 className="max-w-2xl text-[40px] leading-tight font-semibold sm:text-[52px]">
+          Tune UI animations in your browser, export working code.
+        </h1>
+        <p className="max-w-xl text-[15px] text-muted sm:text-[17px]">
+          Explore interactive UI components, customize parameters in real time, and export clean production-ready code.
+        </p>
+        <div className="flex gap-3 mt-2">
+          {session ? (
+            <Link to="/hub">
+              <Button variant="primary" className="px-6 py-2.5 text-[14px]">
+                Open Motion Library
+              </Button>
             </Link>
-            {isAdmin && (
-              <Link
-                to="/admin"
-                className="flex flex-col items-center gap-3 rounded-[var(--radius-lg)] border border-border bg-panel p-8 transition-colors hover:border-accent"
-              >
-                <Shield size={24} className="text-accent" />
-                <span className="text-[15px] font-semibold">Admin panel</span>
-                <span className="text-[13px] text-muted">
-                  Manage categories, thumbnails, and publishing.
-                </span>
-              </Link>
-            )}
-          </div>
-        </section>
-      ) : (
-        <section className="dotted-grid flex flex-1 flex-col items-center justify-center gap-6 px-6 py-24 text-center">
-          <h1 className="max-w-2xl text-[40px] leading-tight font-semibold sm:text-[52px]">
-            Tune UI animations in your browser, export working code.
-          </h1>
-          <div className="flex gap-3">
+          ) : (
             <Link to="/login">
               <Button variant="primary" className="px-6 py-2.5 text-[14px]">
                 Try it free
               </Button>
             </Link>
-          </div>
-        </section>
-      )}
+          )}
+        </div>
+      </section>
     </div>
   );
 }

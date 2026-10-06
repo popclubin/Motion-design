@@ -1,6 +1,7 @@
 import type { ParamSchema } from '../_core/params';
 
 const schema: ParamSchema = [
+  { key: 'mobileView', type: 'toggle', label: 'Mobile view', default: true },
   { key: 'speed', type: 'slider', label: 'Animation speed', default: 1, min: 0.25, max: 3, step: 0.05, unit: 'x' },
   {
     key: 'easingStyle',

@@ -1,6 +1,7 @@
 import type { ParamSchema } from '../_core/params';
 
 const schema: ParamSchema = [
+  { key: 'mobileView', type: 'toggle', label: 'Mobile view', default: true },
   {
     key: 'preset',
     type: 'segmented',

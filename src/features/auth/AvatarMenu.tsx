@@ -59,6 +59,20 @@ export function AvatarMenu() {
               <p className="truncate text-[12px] text-muted">{user.email}</p>
             </div>
             <div className="my-1 h-px bg-border" />
+            <Link
+              to="/hub"
+              onClick={() => setOpen(false)}
+              className="block rounded-sm px-2.5 py-1.5 text-[13px] text-text hover:bg-raised"
+            >
+              Hub
+            </Link>
+            <Link
+              to="/"
+              onClick={() => setOpen(false)}
+              className="block rounded-sm px-2.5 py-1.5 text-[13px] text-text hover:bg-raised"
+            >
+              Landing page
+            </Link>
             {profile?.role === 'admin' && (
               <Link
                 to="/admin"

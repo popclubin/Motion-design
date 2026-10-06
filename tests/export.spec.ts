@@ -23,6 +23,7 @@ const FAKE_SESSION = {
 test('exports an animation that installs and builds standalone', async ({ page }) => {
   await page.addInitScript((session) => {
     localStorage.setItem('sb-placeholder-auth-token', JSON.stringify(session));
+    localStorage.setItem('sb-gbigdrvnhdhgsrollhtp-auth-token', JSON.stringify(session));
   }, FAKE_SESSION);
 
   await page.goto('/editor/card-cascade');
@@ -30,6 +31,7 @@ test('exports an animation that installs and builds standalone', async ({ page }
 
   const downloadPromise = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Export' }).click();
+  await page.getByRole('menuitem', { name: /React/ }).click();
   const download = await downloadPromise;
 
   const workDir = mkdtempSync(join(tmpdir(), 'motion-export-'));

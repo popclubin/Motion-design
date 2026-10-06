@@ -15,18 +15,12 @@ export function TopBar() {
   const title = activeSlug ? getAnimationEntry(activeSlug)?.manifest.name : 'Untitled';
 
   return (
-    <header className="flex h-[var(--top-bar-height)] items-center justify-between gap-3 overflow-hidden border-b border-border bg-panel px-4">
+    <header className="flex h-[var(--top-bar-height)] items-center justify-between gap-3 border-b border-border bg-panel px-4">
       <div className="flex min-w-0 shrink items-center gap-2 whitespace-nowrap">
-        <Link to="/editor" className="shrink-0 text-[14px] font-semibold text-text">
+        <Link to="/hub" className="shrink-0 text-[14px] font-semibold text-text hover:text-accent transition-colors">
           Motion Library
         </Link>
         <Pill className="hidden shrink-0 sm:inline-flex">Beta</Pill>
-        <Link
-          to="/editor"
-          className="ml-3 hidden shrink-0 text-[13px] text-muted hover:text-text md:inline"
-        >
-          Projects
-        </Link>
       </div>
 
       <div className="min-w-0 flex-1 truncate text-center text-[13px] font-medium whitespace-nowrap text-text">

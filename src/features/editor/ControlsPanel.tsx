@@ -1,3 +1,5 @@
+import { Play, RotateCcw } from 'lucide-react';
+import { useParams } from 'react-router';
 import { ColorInput } from '../../components/ui/ColorInput';
 import { NumberInput } from '../../components/ui/NumberInput';
 import { Section } from '../../components/ui/Section';
@@ -8,18 +10,23 @@ import { Toggle } from '../../components/ui/Toggle';
 import { Button } from '../../components/ui/Button';
 import { PanelSlot } from '../../animations/_core/ControlsPortal';
 import { getAnimationEntry } from '../../animations/registry';
-import type { ParamControl, ParamValues } from '../../animations/_core/params';
+import { defaultValuesFromSchema, type ParamControl, type ParamValues } from '../../animations/_core/params';
 import { useEditorStore } from './editorStore';
 
 export function ControlsPanel() {
-  const activeSlug = useEditorStore((s) => s.activeSlug);
+  const { slug: routeSlug } = useParams();
+  const storeActiveSlug = useEditorStore((s) => s.activeSlug);
+  const activeSlug = storeActiveSlug || routeSlug;
   const paramsBySlug = useEditorStore((s) => s.paramsBySlug);
   const setParam = useEditorStore((s) => s.setParam);
   const setParams = useEditorStore((s) => s.setParams);
   const resetParams = useEditorStore((s) => s.resetParams);
+  const restart = useEditorStore((s) => s.restart);
 
   const entry = activeSlug ? getAnimationEntry(activeSlug) : undefined;
-  const values = activeSlug ? paramsBySlug[activeSlug] ?? {} : {};
+  const values = activeSlug
+    ? (paramsBySlug[activeSlug] ?? (entry ? defaultValuesFromSchema(entry.schema) : {}))
+    : {};
 
   if (!entry) {
     return (
@@ -30,20 +37,39 @@ export function ControlsPanel() {
   }
 
   return (
-    <aside className="scrollbar-thin h-full w-[var(--panel-width)] shrink-0 overflow-x-hidden overflow-y-auto border-l border-border bg-panel px-5 py-5">
-      <div className="flex flex-col gap-5 min-w-0 max-w-full">
-        <ControlList
-          controls={entry.schema}
-          values={values}
-          onChange={setParam}
-          onChangeMany={setParams}
-        />
-        <Button variant="ghost" onClick={resetParams}>
-          Reset to defaults
+    <aside className="flex h-full w-[var(--panel-width)] shrink-0 flex-col border-l border-border bg-panel overflow-hidden">
+      {/* Sticky top action bar with Play and Reset buttons */}
+      <div className="sticky top-0 z-20 flex shrink-0 items-center gap-2 border-b border-border bg-panel p-3">
+        <Button
+          variant="secondary"
+          className="flex-1 flex items-center justify-center gap-1.5 py-1.5 text-[12px]"
+          onClick={restart}
+        >
+          <Play size={13} className="text-accent fill-accent shrink-0" />
+          <span className="truncate">Play animation</span>
+        </Button>
+        <Button
+          variant="secondary"
+          className="flex-1 flex items-center justify-center gap-1.5 py-1.5 text-[12px]"
+          onClick={resetParams}
+        >
+          <RotateCcw size={13} className="text-muted shrink-0" />
+          <span className="truncate">Reset to default</span>
         </Button>
       </div>
-      <div className="min-w-0 max-w-full">
-        <PanelSlot />
+
+      <div className="scrollbar-thin flex-1 overflow-x-hidden overflow-y-auto px-5 py-4 pb-20">
+        <div className="flex flex-col gap-5 min-w-0 max-w-full">
+          <ControlList
+            controls={entry.schema}
+            values={values}
+            onChange={setParam}
+            onChangeMany={setParams}
+          />
+        </div>
+        <div className="mt-4 min-w-0 max-w-full">
+          <PanelSlot />
+        </div>
       </div>
     </aside>
   );

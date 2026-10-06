@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { RotateCcw, SlidersHorizontal, Check } from 'lucide-react';
+import { RotateCcw, Check } from 'lucide-react';
 import { SPEED_CURVE_PRESETS, sampleSpeedAt } from '../utils/speedCurve';
 import { cx } from '../../../lib/utils';
 
@@ -131,12 +131,9 @@ export const SpeedCurveEditor: React.FC<SpeedCurveEditorProps> = ({
     <div className="flex flex-col gap-4 border-t border-border pt-4 min-w-0 max-w-full">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <SlidersHorizontal size={14} className="text-accent" />
-          <span className="text-[11px] font-semibold tracking-wide text-muted uppercase">
-            Speed Curve
-          </span>
-        </div>
+        <span className="text-[11px] font-semibold tracking-wide text-muted uppercase">
+          Speed Curve
+        </span>
         {onReplay && (
           <button
             type="button"
