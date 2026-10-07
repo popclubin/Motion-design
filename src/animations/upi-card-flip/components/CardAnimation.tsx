@@ -236,11 +236,27 @@ export function CardAnimation({ currentScreen, onScreenChange, config, user, onS
   );
 
   if (fullMobileView) {
-    return <div className="relative h-full w-full select-none">{screenContent}</div>;
+    return (
+      <div
+        onTouchMove={tilt.handleTouchMove}
+        onTouchEnd={tilt.handleTouchEnd}
+        onPointerMove={tilt.handlePointerMove}
+        onPointerLeave={tilt.handlePointerLeave}
+        className="relative h-full w-full select-none"
+      >
+        {screenContent}
+      </div>
+    );
   }
 
   return (
-    <div className="relative flex h-full w-full items-center justify-center select-none">
+    <div
+      onTouchMove={tilt.handleTouchMove}
+      onTouchEnd={tilt.handleTouchEnd}
+      onPointerMove={tilt.handlePointerMove}
+      onPointerLeave={tilt.handlePointerLeave}
+      className="relative flex h-full w-full items-center justify-center select-none"
+    >
       {/* Device bezel matching the payment-phone-screen phone frame */}
       <div
         className="relative flex-shrink-0 bg-neutral-900 shadow-[0_30px_80px_rgba(0,0,0,0.6)]"

@@ -34,7 +34,7 @@ export function AnimationSidebar() {
       <div className="border-b border-border p-3 flex flex-col gap-2.5">
         <Link
           to="/editor"
-          className="flex items-center justify-between rounded-md border border-border bg-raised px-2.5 py-1.5 text-[12px] font-medium text-text hover:bg-border transition-colors duration-150"
+          className="flex items-center justify-between bg-transparent px-2.5 py-1.5 text-[12px] font-medium text-text transition-colors duration-150"
         >
           <span>Projects</span>
           <span className="text-[10px] text-muted font-normal">All</span>

@@ -229,7 +229,7 @@ export const PopBottomBar = React.forwardRef<PopBottomBarHandle, PopBottomBarPro
   // Layout measurements
   const barRef = useRef<HTMLDivElement | null>(null);
   const tabItemRefs = useRef<Map<NavTabId, HTMLButtonElement>>(new Map());
-  const [targetFinalWidth, setTargetFinalWidth] = useState<number>(310);
+  const [targetFinalWidth, setTargetFinalWidth] = useState<number>(272);
 
   // Measure tab bounds accurately
   const updateMeasurements = () => {
@@ -324,10 +324,11 @@ export const PopBottomBar = React.forwardRef<PopBottomBarHandle, PopBottomBarPro
     : 0;
 
   // Center alignment: the black ball is positioned directly behind the scanner item initially.
-  // Distance from center of resting capsule (targetFinalWidth / 2) to center of resting scanner button (targetFinalWidth + 39px):
-  const restingCenterDiff = targetFinalWidth / 2 + 39;
-  const initialButtonOffsetX = -156.9;
-  const initialTabsOffsetX = restingCenterDiff + initialButtonOffsetX;
+  // Distance from center of resting capsule to center of resting scanner button (with tight gap = 10px):
+  const scannerSize = 54;
+  const gap = 10;
+  const initialButtonOffsetX = -(targetFinalWidth + gap) / 2;
+  const initialTabsOffsetX = (scannerSize + gap) / 2;
 
   // 2. Tabs horizontal position:
   // - 0-175ms: Held directly behind the scanner button at the center
@@ -341,8 +342,8 @@ export const PopBottomBar = React.forwardRef<PopBottomBarHandle, PopBottomBarPro
     : 0;
 
   // 3. Scanner Button horizontal position:
-  // - 0-175ms: Center position (initialButtonOffsetX: -156.9px)
-  // - 175-502ms: -156.9px -> 0px (slides to right dock position)
+  // - 0-175ms: Center position
+  // - 175-502ms: Slides to right dock position (initialButtonOffsetX -> 0px)
   const buttonOffsetX = isAnimating
     ? animTime <= 175
       ? initialButtonOffsetX
@@ -369,17 +370,17 @@ export const PopBottomBar = React.forwardRef<PopBottomBarHandle, PopBottomBarPro
     : 1.0;
 
   // 5. Tabs Width:
-  // Width: 34px -> 177px (181-291ms), custom bezier (0.44, -0.02, 0.56, 1)
+  // Width: starts as circular dot (scannerSize) -> expands to targetFinalWidth (181-291ms)
   let currentCapsuleWidth = targetFinalWidth;
   if (isAnimating) {
     if (animTime < 181) {
-      currentCapsuleWidth = 58;
+      currentCapsuleWidth = scannerSize;
     } else if (animTime <= 291) {
       currentCapsuleWidth = interpolate(
         animTime,
         181,
         291,
-        58,
+        scannerSize,
         targetFinalWidth,
         ewTabs
       );
@@ -401,7 +402,7 @@ export const PopBottomBar = React.forwardRef<PopBottomBarHandle, PopBottomBarPro
     : 1.0;
 
   // 7. Bottom nav units (Home, Shop, Bills, Card):
-  const slotWidth = Math.max(68, (targetFinalWidth - 8) / 4);
+  const slotWidth = Math.max(52, (targetFinalWidth - 8) / 4);
 
   // Home:
   // - Position: x48.8 -> 20.6 (220-478ms) [delta: +28.2px, bezier 0.27, -0.04, 0, 0.99]
@@ -561,12 +562,12 @@ export const PopBottomBar = React.forwardRef<PopBottomBarHandle, PopBottomBarPro
       )}
 
       {/* Main bar row wrapper */}
-      <div className="w-full max-w-[430px] flex items-center justify-between gap-2.5 relative">
+      <div className="w-full max-w-[360px] flex items-center justify-between gap-2.5 relative">
         {/* Main 4-tab pill capsule container with scale & expansion choreography */}
         <div
           ref={barRef}
           id="pop-bottom-tabs-bar"
-          className="relative flex-1 h-[58px] flex items-center z-10"
+          className="relative flex-1 min-w-0 h-[54px] flex items-center z-10"
           style={{
             transform: `translate(${tabsOffsetX}px, ${riseOffsetY}px) scale(${tabsScale})`,
             transformOrigin: '50% 50%',
@@ -671,7 +672,7 @@ export const PopBottomBar = React.forwardRef<PopBottomBarHandle, PopBottomBarPro
             type="button"
             onClick={handleScannerClick}
             aria-label="Scan QR Code"
-            className="relative w-[58px] h-[58px] rounded-full text-[#111215] flex items-center justify-center shadow-[0_4px_24px_rgba(0,0,0,0.6),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_1px_rgba(255,255,255,0.85)] border border-white/50 active:scale-95 active:brightness-95 transition-transform overflow-hidden"
+            className="relative w-[54px] h-[54px] rounded-full text-[#111215] flex items-center justify-center shadow-[0_4px_24px_rgba(0,0,0,0.6),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_1px_rgba(255,255,255,0.85)] border border-white/50 active:scale-95 active:brightness-95 transition-transform overflow-hidden"
             style={{
               background: 'linear-gradient(180deg, #ffffff 0%, #edf0f5 25%, #dfe2ea 50%, #c4c8d3 75%, #abb0bd 100%)',
             }}

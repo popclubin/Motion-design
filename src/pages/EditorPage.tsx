@@ -52,7 +52,7 @@ export default function EditorPage() {
           type="button"
           aria-label={leftCollapsed ? 'Expand left sidebar' : 'Collapse left sidebar'}
           onClick={() => setLeftCollapsed((v) => !v)}
-          className={`hidden lg:flex absolute top-1/2 -translate-y-1/2 z-30 h-14 w-4.5 items-center justify-center rounded-r-md border border-l-0 border-border bg-panel text-muted hover:text-text hover:bg-raised shadow-md transition-all duration-150 cursor-pointer ${
+          className={`hidden lg:flex absolute top-1/2 -translate-y-1/2 z-30 h-24 w-7.5 items-center justify-center rounded-r-md border border-l-0 border-border bg-panel text-muted hover:text-text hover:bg-raised shadow-md transition-all duration-150 cursor-pointer ${
             leftCollapsed ? 'left-0' : 'left-[var(--sidebar-width)]'
           }`}
         >
@@ -67,7 +67,7 @@ export default function EditorPage() {
           type="button"
           aria-label={rightCollapsed ? 'Expand right panel' : 'Collapse right panel'}
           onClick={() => setRightCollapsed((v) => !v)}
-          className={`hidden lg:flex absolute top-1/2 -translate-y-1/2 z-30 h-14 w-4.5 items-center justify-center rounded-l-md border border-r-0 border-border bg-panel text-muted hover:text-text hover:bg-raised shadow-md transition-all duration-150 cursor-pointer ${
+          className={`hidden lg:flex absolute top-1/2 -translate-y-1/2 z-30 h-24 w-7.5 items-center justify-center rounded-l-md border border-r-0 border-border bg-panel text-muted hover:text-text hover:bg-raised shadow-md transition-all duration-150 cursor-pointer ${
             rightCollapsed ? 'right-0' : 'right-[var(--panel-width)]'
           }`}
         >

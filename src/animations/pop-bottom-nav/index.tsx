@@ -23,12 +23,12 @@ export default function PopBottomNav({ params }: AnimationComponentProps) {
   }, [replay]);
 
   const content = (
-    <div className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden bg-neutral-950/40 p-4 select-none">
+    <div className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden bg-neutral-950/40 p-2 sm:p-3 select-none">
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute top-1/2 left-1/2 h-[520px] w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-b from-blue-600/10 via-orange-500/5 to-transparent opacity-75 blur-[130px]" />
       </div>
 
-      <div className="relative z-10 w-full max-w-[430px]">
+      <div className="relative z-10 w-full flex items-center justify-center">
         <PopBottomBar
           ref={barRef}
           selectedTab={activeTab}

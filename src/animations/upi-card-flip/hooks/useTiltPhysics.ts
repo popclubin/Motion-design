@@ -273,7 +273,7 @@ export function useTiltPhysics({
 
   const handlePointerMove = useCallback(
     (e: React.PointerEvent | React.MouseEvent) => {
-      if (!enabled || isGyroActive) return;
+      if (!enabled) return;
       const rect = e.currentTarget.getBoundingClientRect();
       const clientX = 'clientX' in e ? e.clientX : 0;
       const clientY = 'clientY' in e ? e.clientY : 0;
@@ -281,18 +281,19 @@ export function useTiltPhysics({
       targetX.current = Math.max(-1, Math.min(1, ((clientX - rect.left) / rect.width - 0.5) * 2));
       targetY.current = Math.max(-1, Math.min(1, ((clientY - rect.top) / rect.height - 0.5) * 2));
     },
-    [enabled, isGyroActive]
+    [enabled]
   );
 
   const handlePointerLeave = useCallback(() => {
-    if (isGyroActive) return;
-    targetX.current = 0;
-    targetY.current = 0;
-  }, [isGyroActive]);
+    if (performance.now() - lastSensorEventRef.current > 1000) {
+      targetX.current = 0;
+      targetY.current = 0;
+    }
+  }, []);
 
   const handleTouchMove = useCallback(
     (e: React.TouchEvent) => {
-      if (!enabled || isGyroActive) return;
+      if (!enabled) return;
       if (e.touches.length === 1) {
         const touch = e.touches[0];
         const rect = e.currentTarget.getBoundingClientRect();
@@ -300,14 +301,15 @@ export function useTiltPhysics({
         targetY.current = Math.max(-1, Math.min(1, ((touch.clientY - rect.top) / rect.height - 0.5) * 2));
       }
     },
-    [enabled, isGyroActive]
+    [enabled]
   );
 
   const handleTouchEnd = useCallback(() => {
-    if (isGyroActive) return;
-    targetX.current = 0;
-    targetY.current = 0;
-  }, [isGyroActive]);
+    if (performance.now() - lastSensorEventRef.current > 1000) {
+      targetX.current = 0;
+      targetY.current = 0;
+    }
+  }, []);
 
   return {
     ...tiltState,
