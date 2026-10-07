@@ -232,21 +232,34 @@ export const PopBottomBar = React.forwardRef<PopBottomBarHandle, PopBottomBarPro
   const [targetFinalWidth, setTargetFinalWidth] = useState<number>(272);
 
   // Measure tab bounds accurately
-  const updateMeasurements = () => {
+  const updateMeasurements = React.useCallback(() => {
     if (barRef.current) {
-      const barRect = barRef.current.getBoundingClientRect();
-      if (barRect.width > 0) {
-        setTargetFinalWidth(barRect.width);
+      const width = barRef.current.clientWidth || barRef.current.offsetWidth;
+      if (width > 0) {
+        setTargetFinalWidth(width);
       }
     }
-  };
+  }, []);
 
   useLayoutEffect(() => {
     updateMeasurements();
+    if (!barRef.current) return;
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const width = entry.contentRect.width;
+        if (width > 0) {
+          setTargetFinalWidth(width);
+        }
+      }
+    });
+    observer.observe(barRef.current);
     const handleResize = () => updateMeasurements();
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [updateMeasurements]);
 
   // Animation playback runner: 540ms entrance + 1150ms scan laser
   const playAnimation = () => {
@@ -324,9 +337,9 @@ export const PopBottomBar = React.forwardRef<PopBottomBarHandle, PopBottomBarPro
     : 0;
 
   // Center alignment: the black ball is positioned directly behind the scanner item initially.
-  // Distance from center of resting capsule to center of resting scanner button (with tight gap = 10px):
+  // Distance from center of resting capsule to center of resting scanner button (with exact 12px gap):
   const scannerSize = 54;
-  const gap = 10;
+  const gap = 12;
   const initialButtonOffsetX = -(targetFinalWidth + gap) / 2;
   const initialTabsOffsetX = (scannerSize + gap) / 2;
 
@@ -402,7 +415,7 @@ export const PopBottomBar = React.forwardRef<PopBottomBarHandle, PopBottomBarPro
     : 1.0;
 
   // 7. Bottom nav units (Home, Shop, Bills, Card):
-  const slotWidth = Math.max(52, (targetFinalWidth - 8) / 4);
+  const slotWidth = Math.max(38, (targetFinalWidth - 8) / 4);
 
   // Home:
   // - Position: x48.8 -> 20.6 (220-478ms) [delta: +28.2px, bezier 0.27, -0.04, 0, 0.99]
@@ -562,7 +575,7 @@ export const PopBottomBar = React.forwardRef<PopBottomBarHandle, PopBottomBarPro
       )}
 
       {/* Main bar row wrapper */}
-      <div className="w-full max-w-[360px] flex items-center justify-between gap-2.5 relative">
+      <div className="w-full max-w-[360px] flex items-center justify-between gap-3 relative">
         {/* Main 4-tab pill capsule container with scale & expansion choreography */}
         <div
           ref={barRef}
@@ -578,8 +591,8 @@ export const PopBottomBar = React.forwardRef<PopBottomBarHandle, PopBottomBarPro
             id="pop-capsule-body"
             className="absolute h-full rounded-full bg-gradient-to-b from-[#1c1f26] via-[#14161a] to-[#0d0f12] border border-[#2b2f3a]/80 shadow-[0_8px_32px_rgba(0,0,0,0.7)] overflow-hidden pointer-events-auto"
             style={{
-              width: `${currentCapsuleWidth}px`,
-              left: `${capsuleLeft}px`,
+              width: isAnimating && animTime < 291 ? `${currentCapsuleWidth}px` : '100%',
+              left: isAnimating && animTime < 291 ? `${capsuleLeft}px` : '0px',
               transition: isAnimating
                 ? 'none'
                 : 'width 200ms cubic-bezier(0.4, 0, 0.2, 1), left 200ms cubic-bezier(0.4, 0, 0.2, 1)',
@@ -589,8 +602,8 @@ export const PopBottomBar = React.forwardRef<PopBottomBarHandle, PopBottomBarPro
             <div
               className="absolute top-0 bottom-0 pointer-events-none"
               style={{
-                left: `${-capsuleLeft}px`,
-                width: `${targetFinalWidth}px`,
+                left: isAnimating && animTime < 291 ? `${-capsuleLeft}px` : '0px',
+                width: isAnimating && animTime < 291 ? `${targetFinalWidth}px` : '100%',
               }}
             >
               {/* Active Tab Chip (Highlight Pill):
