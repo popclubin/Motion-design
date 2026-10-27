@@ -2,6 +2,7 @@ import type { ParamSchema } from '../_core/params';
 import { COLOR_THEMES } from './themes';
 
 const schema: ParamSchema = [
+  { key: 'showMobileFrame', type: 'toggle', label: 'Show mobile frame', default: true },
   {
     key: 'colorTheme',
     type: 'segmented',

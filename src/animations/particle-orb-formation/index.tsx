@@ -25,6 +25,7 @@ export default function ParticleOrbFormation({ params, panel: Panel }: Animation
   const radius = Number(params.radius ?? 120);
   const interactive = Boolean(params.interactive ?? true);
   const isPlaying = Boolean(params.isPlaying ?? true) && !isPaused;
+  const showMobileFrame = Boolean(params.showMobileFrame ?? true);
 
   const [speedPoints, setSpeedPoints] = useState<number[]>(DEFAULT_SPEED_POINTS);
   const [formationKey, setFormationKey] = useState(1);
@@ -54,32 +55,93 @@ export default function ParticleOrbFormation({ params, panel: Panel }: Animation
 
   const activeProgress = isManualScrubbing ? manualProgress : progress;
 
+  const orbCanvas = (
+    <div
+      className={`relative h-full w-full overflow-hidden select-none ${
+        showMobileFrame ? 'bg-transparent' : 'bg-black'
+      }`}
+    >
+      <ParticleOrb
+        formationKey={formationKey}
+        radius={radius}
+        particleCount={particleCount}
+        color={theme.primary}
+        secondaryColor={theme.secondary}
+        coreColor={theme.core}
+        waveAmplitude={waveAmplitude}
+        waveFrequency={waveFrequency}
+        waveSpeed={waveSpeed}
+        rotationSpeed={rotationSpeed}
+        particleSize={particleSize}
+        glowIntensity={glowIntensity}
+        wavePattern={wavePattern}
+        formationDuration={formationDuration}
+        startPercentage={startPercentage}
+        speedPoints={speedPoints}
+        manualProgress={isManualScrubbing ? manualProgress : null}
+        onProgressUpdate={setProgress}
+        interactive={interactive}
+        isPlaying={isPlaying}
+      />
+    </div>
+  );
+
   return (
-    <main className="relative h-full w-full overflow-hidden bg-panel select-none">
-      <div className="absolute inset-0 z-10">
-        <ParticleOrb
-          formationKey={formationKey}
-          radius={radius}
-          particleCount={particleCount}
-          color={theme.primary}
-          secondaryColor={theme.secondary}
-          coreColor={theme.core}
-          waveAmplitude={waveAmplitude}
-          waveFrequency={waveFrequency}
-          waveSpeed={waveSpeed}
-          rotationSpeed={rotationSpeed}
-          particleSize={particleSize}
-          glowIntensity={glowIntensity}
-          wavePattern={wavePattern}
-          formationDuration={formationDuration}
-          startPercentage={startPercentage}
-          speedPoints={speedPoints}
-          manualProgress={isManualScrubbing ? manualProgress : null}
-          onProgressUpdate={setProgress}
-          interactive={interactive}
-          isPlaying={isPlaying}
-        />
-      </div>
+    <main className="relative flex h-full w-full items-center justify-center overflow-hidden bg-panel select-none">
+      {showMobileFrame ? (
+        <div className="relative flex h-full w-full items-center justify-center p-4">
+          <div
+            className="relative flex-shrink-0 bg-neutral-900 shadow-[0_30px_80px_rgba(0,0,0,0.6)]"
+            style={{
+              aspectRatio: '9.5 / 19.5',
+              height: '90%',
+              maxHeight: '100%',
+              maxWidth: '100%',
+              borderRadius: 54,
+              border: '12px solid #1c1c1e',
+            }}
+          >
+            {/* Phone buttons */}
+            <div className="absolute top-[108px] -left-[2px] h-16 w-[3px] rounded-l-sm bg-[#1c1c1e]" />
+            <div className="absolute top-[180px] -left-[2px] h-10 w-[3px] rounded-l-sm bg-[#1c1c1e]" />
+            <div className="absolute top-[140px] -right-[2px] h-20 w-[3px] rounded-r-sm bg-[#1c1c1e]" />
+
+            <div
+              className="relative flex h-full w-full flex-col overflow-hidden rounded-[42px] bg-[#050002] text-white"
+              style={{
+                backgroundImage: 'url(/animations/particle-orb-formation/wallpaper.png)',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
+              }}
+            >
+              {/* Status bar */}
+              <div className="relative z-40 flex w-full shrink-0 items-center justify-between px-7 pt-3 text-[13px] font-semibold text-white select-none pointer-events-none">
+                <span>9:41</span>
+                <div className="absolute top-2 left-1/2 h-7 w-[108px] -translate-x-1/2 rounded-full bg-black" />
+                <span className="flex items-center gap-1.5 text-[11px]">
+                  5G
+                  <span className="h-3 w-6 rounded-[3px] border border-white/70" />
+                </span>
+              </div>
+
+              {/* Screen canvas */}
+              <div className="relative flex-1 w-full h-full overflow-hidden">
+                {orbCanvas}
+              </div>
+
+              {/* Home indicator bar */}
+              <div className="z-40 flex w-full shrink-0 justify-center pb-2 select-none pointer-events-none">
+                <div className="h-1 w-28 rounded-full bg-neutral-500/70" />
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="absolute inset-0 z-10">
+          {orbCanvas}
+        </div>
+      )}
 
       <Panel>
         <SpeedCurveEditor

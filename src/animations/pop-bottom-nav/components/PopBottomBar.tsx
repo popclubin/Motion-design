@@ -1,9 +1,62 @@
 import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
-import { Home, ShoppingBag, Receipt, CreditCard, RotateCcw } from 'lucide-react';
+import { Home, RotateCcw } from 'lucide-react';
 
 export type NavTabId = 'home' | 'shop' | 'bills' | 'card';
 
 export type EasingStyle = 'original' | 'linear' | 'smooth' | 'snappy';
+
+// Custom tab icons loaded from ImageKit assets (with local cache fallback)
+// Styled to inherit current text color (fill: currentColor)
+const ShopTabIcon: React.FC<{ className?: string }> = ({ className = 'w-[18px] h-[18px]' }) => (
+  <svg
+    viewBox="0 0 20 20"
+    className={className}
+    fill="currentColor"
+    xmlns="http://www.w3.org/2000/svg"
+    aria-hidden="true"
+  >
+    {/* Clean vector geometry matching ImageKit ShopIconWrapper */}
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M7 1.5C6.44772 1.5 6 1.94772 6 2.5V4H3C2.44772 4 2 4.44772 2 5V17C2 18.1046 2.89543 19 4 19H16C17.1046 19 18 18.1046 18 17V5C18 4.44772 17.5523 4 17 4H14V2.5C14 1.94772 13.5523 1.5 13 1.5H7ZM7.5 4V3H12.5V4H7.5ZM3.5 5.5H16.5V17C16.5 17.2761 16.2761 17.5 16 17.5H4C3.72386 17.5 3.5 17.2761 3.5 17V5.5ZM6.5 8C6.5 7.44772 6.94772 7 7.5 7C8.05228 7 8.5 7.44772 8.5 8V9C8.5 9.55228 8.05228 10 7.5 10C6.94772 10 6.5 9.55228 6.5 9V8ZM13.5 8C13.5 7.44772 13.0523 7 12.5 7C11.9477 7 11.5 7.44772 11.5 8V9C11.5 9.55228 11.9477 10 12.5 10C13.0523 10 13.5 9.55228 13.5 9V8Z"
+    />
+  </svg>
+);
+
+const BillTabIcon: React.FC<{ className?: string }> = ({ className = 'w-[18px] h-[18px]' }) => (
+  <svg
+    viewBox="0 0 20 20"
+    className={className}
+    fill="currentColor"
+    xmlns="http://www.w3.org/2000/svg"
+    aria-hidden="true"
+  >
+    {/* Clean vector geometry matching ImageKit BillIconWrapper receipt */}
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M3.5 2C2.67157 2 2 2.67157 2 3.5V17.5L3.5 16.5L5 17.5L6.5 16.5L8 17.5L9.5 16.5L11 17.5L12.5 16.5L14 17.5L15.5 16.5L17 17.5L18 16.5V3.5C18 2.67157 17.3284 2 16.5 2H3.5ZM3.5 3.5H16.5V15.3L15.5 14.5L14 15.5L12.5 14.5L11 15.5L9.5 14.5L8 15.5L6.5 14.5L5 15.5L3.5 14.5V3.5ZM5.5 5.5C5.5 5.08579 5.83579 4.75 6.25 4.75H13.75C14.1642 4.75 14.5 5.08579 14.5 5.5C14.5 5.91421 14.1642 6.25 13.75 6.25H6.25C5.83579 6.25 5.5 5.91421 5.5 5.5ZM5.5 8.5C5.5 8.08579 5.83579 7.75 6.25 7.75H11.75C12.1642 7.75 12.5 8.08579 12.5 8.5C12.5 8.91421 12.1642 9.25 11.75 9.25H6.25C5.83579 9.25 5.5 8.91421 5.5 8.5ZM5.5 11.5C5.5 11.0858 5.83579 10.75 6.25 10.75H8.75C9.16421 10.75 9.5 11.0858 9.5 11.5C9.5 11.9142 9.16421 12.25 8.75 12.25H6.25C5.83579 12.25 5.5 11.9142 5.5 11.5Z"
+    />
+  </svg>
+);
+
+const CardTabIcon: React.FC<{ className?: string }> = ({ className = 'w-[18px] h-[18px]' }) => (
+  <svg
+    viewBox="0 0 20 20"
+    className={className}
+    fill="currentColor"
+    xmlns="http://www.w3.org/2000/svg"
+    aria-hidden="true"
+  >
+    {/* Clean vector geometry matching ImageKit CardIconWrapper credit card with chip */}
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M2.5 4C1.67157 4 1 4.67157 1 5.5V14.5C1 15.3284 1.67157 16 2.5 16H17.5C18.3284 16 19 15.3284 19 14.5V5.5C19 4.67157 18.3284 4 17.5 4H2.5ZM2.5 5.5H17.5V7H2.5V5.5ZM2.5 8.5H17.5V14.5H2.5V8.5ZM4.25 10.5C3.83579 10.5 3.5 10.8358 3.5 11.25V12.75C3.5 13.1642 3.83579 13.5 4.25 13.5H7.25C7.66421 13.5 8 13.1642 8 12.75V11.25C8 10.8358 7.66421 10.5 7.25 10.5H4.25Z"
+    />
+  </svg>
+);
 
 export interface PopBottomBarProps {
   selectedTab?: NavTabId;
@@ -196,27 +249,27 @@ export const PopBottomBar = React.forwardRef<PopBottomBarHandle, PopBottomBarPro
     const eBg = pickEasing(easingStyle, easingActiveBg);
 
     const tabs: Array<{ id: NavTabId; label: string; icon: React.ReactNode }> = [
-    {
-      id: 'home',
-      label: 'Home',
-      icon: <Home className="w-[18px] h-[18px]" strokeWidth={2.2} />,
-    },
-    {
-      id: 'shop',
-      label: 'Shop',
-      icon: <ShoppingBag className="w-[18px] h-[18px]" strokeWidth={1.9} />,
-    },
-    {
-      id: 'bills',
-      label: 'Bills',
-      icon: <Receipt className="w-[18px] h-[18px]" strokeWidth={1.9} />,
-    },
-    {
-      id: 'card',
-      label: 'Card',
-      icon: <CreditCard className="w-[18px] h-[18px]" strokeWidth={1.9} />,
-    },
-  ];
+      {
+        id: 'home',
+        label: 'Home',
+        icon: <Home className="w-[18px] h-[18px]" strokeWidth={2.2} />,
+      },
+      {
+        id: 'shop',
+        label: 'Shop',
+        icon: <ShopTabIcon className="w-[18px] h-[18px]" />,
+      },
+      {
+        id: 'bills',
+        label: 'Bills',
+        icon: <BillTabIcon className="w-[18px] h-[18px]" />,
+      },
+      {
+        id: 'card',
+        label: 'Card',
+        icon: <CardTabIcon className="w-[18px] h-[18px]" />,
+      },
+    ];
 
   // Animation timeline state: 540ms (entrance) + 1150ms (scanner animation) = 1690ms
   const [animTime, setAnimTime] = useState<number>(autoPlay ? 0 : TOTAL_ANIMATION_DURATION);

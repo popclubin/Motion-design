@@ -7,8 +7,17 @@
     "/animations/infinite-card-carousel/cards/kotak_vertical.png",
     "/animations/infinite-card-carousel/cards/sbi_vertical.png"
   ],
+  "particle-orb-formation": [
+    "/animations/particle-orb-formation/wallpaper.png"
+  ],
   "payment-phone-screen": [
     "/animations/payment-phone-screen/font.otf"
+  ],
+  "pop-bottom-nav": [
+    "/animations/pop-bottom-nav/bill-icon.png",
+    "/animations/pop-bottom-nav/card-icon.png",
+    "/animations/pop-bottom-nav/pop-home-bg.png",
+    "/animations/pop-bottom-nav/shop-icon.png"
   ],
   "tinder-swipe": [
     "/animations/tinder-swipe/chat-bg.jpg",
