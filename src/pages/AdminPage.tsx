@@ -1,26 +1,17 @@
-import { Film, GripVertical, Image as ImageIcon, Pencil, Plus, UploadCloud } from 'lucide-react';
+import { GripVertical, Pencil, Plus } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router';
 import { AvatarMenu } from '../features/auth/AvatarMenu';
 import { EditDrawer, type AnimationMetaPatch } from '../features/admin/EditDrawer';
-import { publicThumbnailUrl, uploadThumbnailAsset, upsertAnimationMeta } from '../features/admin/adminApi';
+import { publicThumbnailUrl, upsertAnimationMeta } from '../features/admin/adminApi';
 import { useAdminCatalog, type AdminRow } from '../features/admin/useAdminCatalog';
 import { initialsFor, refreshCatalog } from '../features/editor/animationCatalog';
 import { Button } from '../components/ui/Button';
-import { Dialog } from '../components/ui/Dialog';
 import { Pill } from '../components/ui/Pill';
-import { Select } from '../components/ui/Select';
 import { Spinner } from '../components/ui/Spinner';
 import { Toggle } from '../components/ui/Toggle';
 import { toastError, toastSuccess } from '../lib/toastStore';
 import type { CategoryRow } from '../types/database';
-
-function slugify(name: string): string {
-  return name
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-}
 
 function AdminThumbnail({
   posterPath,
@@ -74,252 +65,13 @@ function AdminThumbnail({
   );
 }
 
-interface AddAnimationDialogProps {
-  open: boolean;
-  onClose: () => void;
-  categories: CategoryRow[];
-  existingSlugs: Set<string>;
-  onCreated: () => Promise<void>;
-}
-
-function AddAnimationDialog({
-  open,
-  onClose,
-  categories,
-  existingSlugs,
-  onCreated,
-}: AddAnimationDialogProps) {
-  const [displayName, setDisplayName] = useState('');
-  const [slug, setSlug] = useState('');
-  const [slugCustomized, setSlugCustomized] = useState(false);
-  const [category, setCategory] = useState(categories[0]?.slug ?? '');
-  const [isPublished, setIsPublished] = useState(true);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [videoFile, setVideoFile] = useState<File | null>(null);
-  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
-  const [videoPreviewUrl, setVideoPreviewUrl] = useState<string | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
-
-  useEffect(() => {
-    if (!slugCustomized) {
-      setSlug(slugify(displayName));
-    }
-  }, [displayName, slugCustomized]);
-
-  useEffect(() => {
-    if (categories.length > 0 && !category) {
-      setCategory(categories[0]!.slug);
-    }
-  }, [categories, category]);
-
-  useEffect(() => {
-    return () => {
-      if (imagePreviewUrl?.startsWith('blob:')) URL.revokeObjectURL(imagePreviewUrl);
-      if (videoPreviewUrl?.startsWith('blob:')) URL.revokeObjectURL(videoPreviewUrl);
-    };
-  }, [imagePreviewUrl, videoPreviewUrl]);
-
-  function handleImageChange(file: File | null) {
-    if (videoPreviewUrl?.startsWith('blob:')) URL.revokeObjectURL(videoPreviewUrl);
-    if (imagePreviewUrl?.startsWith('blob:')) URL.revokeObjectURL(imagePreviewUrl);
-    setVideoFile(null);
-    setVideoPreviewUrl(null);
-    setImageFile(file);
-    setImagePreviewUrl(file ? URL.createObjectURL(file) : null);
-  }
-
-  function handleVideoChange(file: File | null) {
-    if (imagePreviewUrl?.startsWith('blob:')) URL.revokeObjectURL(imagePreviewUrl);
-    if (videoPreviewUrl?.startsWith('blob:')) URL.revokeObjectURL(videoPreviewUrl);
-    setImageFile(null);
-    setImagePreviewUrl(null);
-    setVideoFile(file);
-    setVideoPreviewUrl(file ? URL.createObjectURL(file) : null);
-  }
-
-  async function handleAddSubmit() {
-    const trimmedName = displayName.trim();
-    const finalSlug = slug.trim();
-
-    if (!trimmedName) {
-      toastError('Please enter an animation name.');
-      return;
-    }
-    if (!finalSlug) {
-      toastError('Please enter a valid slug.');
-      return;
-    }
-    if (existingSlugs.has(finalSlug)) {
-      toastError('An animation with this slug already exists.');
-      return;
-    }
-
-    setIsSaving(true);
-    try {
-      let posterPath: string | null = null;
-      let thumbnailVideoPath: string | null = null;
-
-      if (imageFile) {
-        posterPath = await uploadThumbnailAsset(finalSlug, imageFile, null);
-      } else if (videoFile) {
-        thumbnailVideoPath = await uploadThumbnailAsset(finalSlug, videoFile, null);
-      }
-
-      await upsertAnimationMeta({
-        slug: finalSlug,
-        display_name: trimmedName,
-        category: category || null,
-        is_new: true,
-        is_published: isPublished,
-        poster_path: posterPath,
-        thumbnail_video_path: thumbnailVideoPath,
-        sort_order: 0,
-      });
-
-      toastSuccess('Animation added.');
-      await onCreated();
-      onClose();
-    } catch {
-      toastError('Could not create animation.');
-    } finally {
-      setIsSaving(false);
-    }
-  }
-
-  return (
-    <Dialog open={open} onClose={onClose} title="Add New Animation">
-      <div className="flex flex-col gap-4">
-        {/* Preview box */}
-        <div className="relative aspect-video w-full overflow-hidden rounded-md border border-border bg-raised">
-          {imagePreviewUrl ? (
-            <img src={imagePreviewUrl} alt="Preview" className="h-full w-full object-cover" />
-          ) : videoPreviewUrl ? (
-            <video
-              src={videoPreviewUrl}
-              muted
-              loop
-              autoPlay
-              playsInline
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            <div className="flex h-full w-full flex-col items-center justify-center gap-1.5 text-muted">
-              <UploadCloud size={24} className="opacity-40" />
-              <span className="text-[12px]">No media selected</span>
-            </div>
-          )}
-        </div>
-
-        {/* Display name */}
-        <label className="flex flex-col gap-1">
-          <span className="text-[12px] text-muted">Animation name</span>
-          <input
-            value={displayName}
-            onChange={(e) => setDisplayName(e.target.value)}
-            placeholder="e.g. Glowing Sphere"
-            className="rounded-md border border-border bg-raised px-2.5 py-1.5 text-[13px] text-text focus-visible:outline-none"
-          />
-        </label>
-
-        {/* Slug */}
-        <label className="flex flex-col gap-1">
-          <span className="text-[12px] text-muted">Slug</span>
-          <input
-            value={slug}
-            onChange={(e) => {
-              setSlugCustomized(true);
-              setSlug(e.target.value);
-            }}
-            placeholder="e.g. glowing-sphere"
-            className="rounded-md border border-border bg-raised px-2.5 py-1.5 text-[13px] text-text focus-visible:outline-none"
-          />
-        </label>
-
-        {/* Category */}
-        {categories.length > 0 && (
-          <Select
-            label="Category"
-            value={category}
-            onChange={setCategory}
-            options={categories.map((c) => ({ label: c.name, value: c.slug }))}
-          />
-        )}
-
-        {/* Image upload */}
-        <div className="flex flex-col gap-1.5">
-          <span className="text-[12px] font-medium text-muted">Image upload</span>
-          <label className="flex cursor-pointer items-center justify-between gap-2 rounded-md border border-border bg-raised px-3 py-2 text-[13px] text-text transition-colors hover:border-accent">
-            <div className="flex min-w-0 items-center gap-2">
-              <ImageIcon size={16} className="shrink-0 text-muted" />
-              <span className="truncate text-[12px] text-text">
-                {imageFile ? imageFile.name : 'Choose an image file…'}
-              </span>
-            </div>
-            <span className="shrink-0 rounded bg-border px-2 py-0.5 text-[11px] text-muted">
-              Browse
-            </span>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => handleImageChange(e.target.files?.[0] ?? null)}
-              className="hidden"
-            />
-          </label>
-        </div>
-
-        {/* Video upload */}
-        <div className="flex flex-col gap-1.5">
-          <span className="text-[12px] font-medium text-muted">Video upload</span>
-          <label className="flex cursor-pointer items-center justify-between gap-2 rounded-md border border-border bg-raised px-3 py-2 text-[13px] text-text transition-colors hover:border-accent">
-            <div className="flex min-w-0 items-center gap-2">
-              <Film size={16} className="shrink-0 text-muted" />
-              <span className="truncate text-[12px] text-text">
-                {videoFile ? videoFile.name : 'Choose a video file…'}
-              </span>
-            </div>
-            <span className="shrink-0 rounded bg-border px-2 py-0.5 text-[11px] text-muted">
-              Browse
-            </span>
-            <input
-              type="file"
-              accept="video/*"
-              onChange={(e) => handleVideoChange(e.target.files?.[0] ?? null)}
-              className="hidden"
-            />
-          </label>
-        </div>
-
-        {/* Published toggle */}
-        <Toggle
-          label={isPublished ? 'Published' : 'Unpublished'}
-          checked={isPublished}
-          onChange={setIsPublished}
-        />
-
-        <div className="mt-2 flex justify-end gap-2">
-          <Button variant="ghost" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button
-            variant="primary"
-            disabled={isSaving || !displayName.trim() || !slug.trim()}
-            onClick={() => void handleAddSubmit()}
-          >
-            {isSaving ? 'Adding…' : 'Add animation'}
-          </Button>
-        </div>
-      </div>
-    </Dialog>
-  );
-}
-
 export default function AdminPage() {
+  const navigate = useNavigate();
   const { rows, categories, isLoading, error, refetch } = useAdminCatalog();
   const [localRows, setLocalRows] = useState<AdminRow[] | null>(null);
   const [localCategories, setLocalCategories] = useState<CategoryRow[] | null>(null);
   const [editingSlug, setEditingSlug] = useState<string | null>(null);
   const [dragSlug, setDragSlug] = useState<string | null>(null);
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
   useEffect(() => {
     setLocalRows(null);
@@ -331,11 +83,6 @@ export default function AdminPage() {
 
   const effectiveRows = localRows ?? rows;
   const effectiveCategories = localCategories ?? categories;
-
-  const existingSlugs = useMemo(
-    () => new Set(effectiveRows.map((r) => r.slug)),
-    [effectiveRows],
-  );
 
   const grouped = useMemo(() => {
     const byCategory = new Map<string, AdminRow[]>();
@@ -456,7 +203,7 @@ export default function AdminPage() {
               <h1 className="text-[18px] font-semibold text-text">Animation Management</h1>
               <Button
                 variant="primary"
-                onClick={() => setIsAddDialogOpen(true)}
+                onClick={() => navigate('/add-animation')}
                 className="gap-1.5"
               >
                 <Plus size={15} />
@@ -528,17 +275,6 @@ export default function AdminPage() {
           onSave={applyPatch}
         />
       )}
-
-      <AddAnimationDialog
-        open={isAddDialogOpen}
-        onClose={() => setIsAddDialogOpen(false)}
-        categories={effectiveCategories}
-        existingSlugs={existingSlugs}
-        onCreated={async () => {
-          refetch();
-          await refreshCatalog();
-        }}
-      />
     </div>
   );
 }

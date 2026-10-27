@@ -1,7 +1,7 @@
-import { createBrowserRouter } from 'react-router';
+import { createBrowserRouter, Navigate } from 'react-router';
+import AddAnimationPage from '../pages/AddAnimationPage';
 import AdminPage from '../pages/AdminPage';
 import EditorPage from '../pages/EditorPage';
-import HubPage from '../pages/HubPage';
 import LandingPage from '../pages/LandingPage';
 import LoginPage from '../pages/LoginPage';
 import NotFoundPage from '../pages/NotFoundPage';
@@ -15,11 +15,7 @@ export const router = createBrowserRouter([
   { path: '/reset-password', element: <ResetPasswordPage /> },
   {
     path: '/hub',
-    element: (
-      <RequireAuth>
-        <HubPage />
-      </RequireAuth>
-    ),
+    element: <Navigate to="/editor" replace />,
   },
   {
     path: '/editor',
@@ -34,6 +30,14 @@ export const router = createBrowserRouter([
     element: (
       <RequireAuth>
         <EditorPage />
+      </RequireAuth>
+    ),
+  },
+  {
+    path: '/add-animation',
+    element: (
+      <RequireAuth>
+        <AddAnimationPage />
       </RequireAuth>
     ),
   },

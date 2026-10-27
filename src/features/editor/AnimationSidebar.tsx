@@ -1,4 +1,4 @@
-import { Search } from 'lucide-react';
+import { Pencil, Plus, Search } from 'lucide-react';
 import { useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { Pill } from '../../components/ui/Pill';
@@ -33,11 +33,11 @@ export function AnimationSidebar() {
     <aside className="flex h-full w-[var(--sidebar-width)] flex-col border-r border-border bg-panel select-none">
       <div className="border-b border-border p-3 flex flex-col gap-2.5">
         <Link
-          to="/editor"
-          className="flex items-center justify-between bg-transparent px-2.5 py-1.5 text-[12px] font-medium text-text transition-colors duration-150"
+          to="/add-animation"
+          className="flex items-center justify-center gap-1.5 rounded-md bg-accent px-2.5 py-1.5 text-[12px] font-medium text-white transition-colors duration-150 hover:bg-accent-hover"
         >
-          <span>Projects</span>
-          <span className="text-[10px] text-muted font-normal">All</span>
+          <Plus size={14} />
+          <span>Add animation</span>
         </Link>
         <div className="flex items-center gap-2 rounded-md border border-border bg-raised px-2.5 py-1.5">
           <Search size={14} className="text-muted shrink-0" />
@@ -78,7 +78,28 @@ export function AnimationSidebar() {
                   className="h-full w-full object-cover"
                 />
                 {item.isNew && (
-                  <Pill className="absolute top-1.5 left-1.5 bg-panel text-[10px] px-1.5 py-0">New</Pill>
+                  <Pill className="absolute top-1.5 left-1.5 bg-panel text-[10px] px-1.5 py-0 z-10">New</Pill>
+                )}
+                {item.canEdit && (
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Edit ${item.displayName}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/add-animation?edit=${item.slug}`);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.stopPropagation();
+                        navigate(`/add-animation?edit=${item.slug}`);
+                      }
+                    }}
+                    className="absolute top-1.5 right-1.5 z-20 flex h-6 w-6 items-center justify-center rounded-md bg-black/75 text-neutral-300 backdrop-blur-xs hover:bg-accent hover:text-white transition-all shadow-sm cursor-pointer"
+                    title="Edit animation"
+                  >
+                    <Pencil size={11} />
+                  </div>
                 )}
                 <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/65 p-2 text-center opacity-0 backdrop-blur-[2px] transition-opacity duration-150 group-hover:opacity-100">
                   <span className="text-[12px] font-semibold text-white leading-tight">

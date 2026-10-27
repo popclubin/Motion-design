@@ -105,6 +105,11 @@ export function createPlaceholderEntry(
   };
 }
 
+export function isRealAnimation(slug?: string | null): boolean {
+  if (!slug) return false;
+  return animationRegistry.some((entry) => entry.manifest.slug === slug);
+}
+
 export function getAnimationEntry(slug: string): AnimationEntry | undefined {
   return animationRegistry.find((entry) => entry.manifest.slug === slug) ?? createPlaceholderEntry(slug);
 }

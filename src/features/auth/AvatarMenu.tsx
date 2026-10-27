@@ -60,11 +60,11 @@ export function AvatarMenu() {
             </div>
             <div className="my-1 h-px bg-border" />
             <Link
-              to="/hub"
+              to="/editor"
               onClick={() => setOpen(false)}
               className="block rounded-sm px-2.5 py-1.5 text-[13px] text-text hover:bg-raised"
             >
-              Hub
+              Editor
             </Link>
             {profile?.role === 'admin' && (
               <Link

@@ -5,7 +5,7 @@ import { thumbnailPlayback } from './thumbnailPlayback';
 interface ThumbnailVideoProps {
   videoSrc?: string | null;
   posterSrc?: string | null;
-  initials: string;
+  initials?: string;
   className?: string;
 }
 
@@ -16,7 +16,7 @@ function usePrefersReducedMotion(): boolean {
   return prefers;
 }
 
-export function ThumbnailVideo({ videoSrc, posterSrc, initials, className }: ThumbnailVideoProps) {
+export function ThumbnailVideo({ videoSrc, posterSrc, className }: ThumbnailVideoProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isIntersecting, setIsIntersecting] = useState(false);
   const [videoError, setVideoError] = useState(false);
@@ -88,10 +88,16 @@ export function ThumbnailVideo({ videoSrc, posterSrc, initials, className }: Thu
       <div
         className={cx(
           className,
-          'flex items-center justify-center bg-raised text-[13px] font-semibold text-muted',
+          'relative flex items-center justify-center bg-[#101216] overflow-hidden select-none border border-neutral-800/40',
         )}
       >
-        {initials}
+        {/* Dummy greyish skeleton thumbnail */}
+        <div className="flex flex-col items-center justify-center gap-2 w-full h-full p-2.5 opacity-60">
+          <div className="w-11 h-7 rounded-md bg-neutral-800/90 animate-pulse border border-neutral-700/40 flex items-center justify-center shadow-inner">
+            <div className="w-3.5 h-3.5 rounded-full bg-neutral-700/60" />
+          </div>
+          <div className="h-1.5 w-14 rounded bg-neutral-800/70 animate-pulse" />
+        </div>
       </div>
     );
   }

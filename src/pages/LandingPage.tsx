@@ -15,9 +15,9 @@ export default function LandingPage() {
     );
   }
 
-  // Once authenticated, immediately redirect to the Hub page
+  // Once authenticated, immediately redirect to the Editor page
   if (session) {
-    return <Navigate to="/hub" replace />;
+    return <Navigate to="/editor" replace />;
   }
 
   return (

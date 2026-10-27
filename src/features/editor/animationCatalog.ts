@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { animationRegistry, createPlaceholderEntry, isRecentlyAdded, type AnimationEntry } from '../../animations/registry';
 import { supabase } from '../../lib/supabase';
+import { useAuth } from '../auth/AuthProvider';
 import type { AnimationMetaRow, CategoryRow } from '../../types/database';
 
 export interface CatalogEntry {
@@ -13,12 +14,42 @@ export interface CatalogEntry {
   thumbnailUrl: string | null;
   posterUrl: string | null;
   isNew: boolean;
+  isCustom: boolean;
+  canEdit: boolean;
+  meta?: AnimationMetaRow;
   entry: AnimationEntry;
+}
+
+export interface AnimationExtraData {
+  prompt?: string;
+  creator_id?: string | null;
+  creator_role?: 'admin' | 'user';
+  reference_images?: string[];
+  reference_videos?: string[];
+}
+
+export function parseExtraData(descriptionOverride: string | null): AnimationExtraData {
+  if (!descriptionOverride) return {};
+  try {
+    const parsed = JSON.parse(descriptionOverride);
+    if (typeof parsed === 'object' && parsed !== null) return parsed;
+  } catch {
+    return { prompt: descriptionOverride };
+  }
+  return {};
+}
+
+export function encodeExtraData(data: AnimationExtraData): string {
+  return JSON.stringify(data);
 }
 
 interface RemoteCatalogData {
   metaBySlug: Map<string, AnimationMetaRow>;
   categoryOrder: Map<string, number>;
+}
+
+export function getCachedAnimationMeta(slug: string): AnimationMetaRow | undefined {
+  return cache.metaBySlug.get(slug);
 }
 
 function publicUrlFor(path: string | null): string | null {
@@ -115,6 +146,9 @@ function mergeEntry(entry: AnimationEntry, remote: RemoteCatalogData): CatalogEn
     thumbnailUrl: videoUrl,
     posterUrl: posterUrl,
     isNew: meta?.is_new ?? isRecentlyAdded(entry.manifest.addedAt),
+    isCustom: false,
+    canEdit: false,
+    meta,
     entry,
   };
 }
@@ -130,6 +164,10 @@ interface UseAnimationCatalogResult {
 }
 
 export function useAnimationCatalog(): UseAnimationCatalogResult {
+  const { user, profile } = useAuth();
+  const isAdmin = profile?.role === 'admin';
+  const currentUserId = user?.id;
+
   const [, forceRender] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -153,6 +191,25 @@ export function useAnimationCatalog(): UseAnimationCatalogResult {
 
   for (const meta of cache.metaBySlug.values()) {
     if (!registrySlugs.has(meta.slug) && meta.is_published) {
+      // Visibility rule:
+      // If admin created it -> visible to everyone
+      // If a user created it -> visible ONLY in his account (or to admins)
+      const extra = parseExtraData(meta.description_override);
+      const isCreatedByAdmin = Boolean(
+        extra.creator_role === 'admin' ||
+        (!extra.creator_role && !meta.updated_by)
+      );
+      const isOwner = Boolean(
+        currentUserId && (
+          meta.updated_by === currentUserId ||
+          extra.creator_id === currentUserId
+        )
+      );
+
+      if (!isCreatedByAdmin && !isAdmin && !isOwner) {
+        continue;
+      }
+
       const placeholder = createPlaceholderEntry(
         meta.slug,
         meta.display_name || meta.slug,
@@ -167,6 +224,9 @@ export function useAnimationCatalog(): UseAnimationCatalogResult {
         thumbnailUrl: publicUrlFor(meta.thumbnail_video_path),
         posterUrl: publicUrlFor(meta.poster_path),
         isNew: meta.is_new,
+        isCustom: true,
+        canEdit: isOwner || isAdmin,
+        meta,
         entry: placeholder,
       });
     }

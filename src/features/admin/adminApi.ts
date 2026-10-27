@@ -20,13 +20,26 @@ export async function upsertAnimationMeta(
   patch: Partial<AnimationMetaRow> & { slug: string; display_name: string },
 ): Promise<AnimationMetaRow> {
   const { data: userData } = await supabase.auth.getUser();
+  const userId = userData.user?.id ?? null;
+
+  const payload: Record<string, unknown> = {
+    slug: patch.slug,
+    display_name: patch.display_name,
+    updated_at: new Date().toISOString(),
+    updated_by: userId,
+  };
+
+  if (patch.category !== undefined) payload.category = patch.category;
+  if (patch.sort_order !== undefined) payload.sort_order = patch.sort_order;
+  if (patch.thumbnail_video_path !== undefined) payload.thumbnail_video_path = patch.thumbnail_video_path;
+  if (patch.poster_path !== undefined) payload.poster_path = patch.poster_path;
+  if (patch.description_override !== undefined) payload.description_override = patch.description_override;
+  if (patch.is_new !== undefined) payload.is_new = patch.is_new;
+  if (patch.is_published !== undefined) payload.is_published = patch.is_published;
+
   const { data, error } = await supabase
     .from('animation_meta')
-    .upsert({
-      ...patch,
-      updated_at: new Date().toISOString(),
-      updated_by: userData.user?.id,
-    })
+    .upsert(payload as AnimationMetaRow)
     .select('*')
     .single();
   if (error) throw error;

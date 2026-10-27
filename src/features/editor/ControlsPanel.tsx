@@ -1,4 +1,4 @@
-import { Play, RotateCcw } from 'lucide-react';
+import { Play, RotateCcw, Sliders } from 'lucide-react';
 import { useParams } from 'react-router';
 import { ColorInput } from '../../components/ui/ColorInput';
 import { NumberInput } from '../../components/ui/NumberInput';
@@ -9,7 +9,7 @@ import { Slider } from '../../components/ui/Slider';
 import { Toggle } from '../../components/ui/Toggle';
 import { Button } from '../../components/ui/Button';
 import { PanelSlot } from '../../animations/_core/ControlsPortal';
-import { getAnimationEntry } from '../../animations/registry';
+import { getAnimationEntry, isRealAnimation } from '../../animations/registry';
 import { defaultValuesFromSchema, type ParamControl, type ParamValues } from '../../animations/_core/params';
 import { useEditorStore } from './editorStore';
 
@@ -24,6 +24,7 @@ export function ControlsPanel() {
   const restart = useEditorStore((s) => s.restart);
 
   const entry = activeSlug ? getAnimationEntry(activeSlug) : undefined;
+  const isReal = isRealAnimation(activeSlug);
   const values = activeSlug
     ? (paramsBySlug[activeSlug] ?? (entry ? defaultValuesFromSchema(entry.schema) : {}))
     : {};
@@ -32,6 +33,107 @@ export function ControlsPanel() {
     return (
       <aside className="h-full w-[var(--panel-width)] shrink-0 overflow-hidden border-l border-border bg-panel p-4">
         <p className="text-[12px] text-muted">Select an animation to edit its parameters.</p>
+      </aside>
+    );
+  }
+
+  // If real animation code is not done yet, show the greyish skeleton parameters panel
+  if (!isReal) {
+    return (
+      <aside className="flex h-full w-[var(--panel-width)] shrink-0 flex-col border-l border-border bg-[#0d0f12] text-text overflow-hidden select-none">
+        {/* Top Play/Reset mock buttons */}
+        <div className="sticky top-0 z-20 flex shrink-0 items-center gap-2 border-b border-border/80 bg-[#14171d]/60 p-3">
+          <Button
+            variant="secondary"
+            disabled
+            className="flex-1 flex items-center justify-center gap-1.5 py-1.5 text-[12px] opacity-60 cursor-not-allowed"
+          >
+            <Play size={13} className="text-muted shrink-0" />
+            <span className="truncate">Play animation</span>
+          </Button>
+          <Button
+            variant="secondary"
+            disabled
+            className="flex-1 flex items-center justify-center gap-1.5 py-1.5 text-[12px] opacity-60 cursor-not-allowed"
+          >
+            <RotateCcw size={13} className="text-muted shrink-0" />
+            <span className="truncate">Reset to default</span>
+          </Button>
+        </div>
+
+        {/* Section title */}
+        <div className="flex items-center gap-2 border-b border-border/70 px-5 py-2.5 bg-[#111317]">
+          <Sliders size={13} className="text-muted" />
+          <span className="text-[11px] font-bold tracking-wider text-neutral-400 uppercase">
+            Tuning Parameters (Skeleton)
+          </span>
+        </div>
+
+        {/* Mock greyish parameter skeleton */}
+        <div className="scrollbar-thin flex-1 overflow-x-hidden overflow-y-auto px-5 py-4 pb-20 space-y-6">
+          {/* Skeleton Group 1 */}
+          <div className="border-b border-border/70 pb-5 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="h-3 w-28 rounded bg-neutral-800" />
+              <div className="h-3 w-3 rounded-full bg-neutral-800" />
+            </div>
+            <div className="space-y-3.5 pt-1">
+              {[80, 50, 95, 65].map((widthPct, idx) => (
+                <div key={idx} className="flex items-center justify-between gap-3">
+                  <div className="h-2.5 rounded bg-neutral-800/80" style={{ width: `${widthPct}px` }} />
+                  <div className="flex items-center gap-2">
+                    <div className="h-1.5 w-24 rounded-full bg-neutral-800" />
+                    <div className="h-2.5 w-6 rounded bg-neutral-800/60" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Skeleton Group 2 */}
+          <div className="border-b border-border/70 pb-5 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="h-3 w-32 rounded bg-neutral-800" />
+              <div className="h-3 w-3 rounded-full bg-neutral-800" />
+            </div>
+            <div className="space-y-3.5 pt-1">
+              {[70, 85, 45, 60, 40].map((widthPct, idx) => (
+                <div key={idx} className="flex items-center justify-between gap-3">
+                  <div className="h-2.5 rounded bg-neutral-800/80" style={{ width: `${widthPct}px` }} />
+                  <div className="flex items-center gap-2">
+                    <div className="h-1.5 w-24 rounded-full bg-neutral-800" />
+                    <div className="h-2.5 w-6 rounded bg-neutral-800/60" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Skeleton Group 3 */}
+          <div className="pb-4 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="h-3 w-24 rounded bg-neutral-800" />
+              <div className="h-3 w-3 rounded-full bg-neutral-800" />
+            </div>
+            <div className="space-y-3.5 pt-1">
+              {[60, 75, 50].map((widthPct, idx) => (
+                <div key={idx} className="flex items-center justify-between gap-3">
+                  <div className="h-2.5 rounded bg-neutral-800/80" style={{ width: `${widthPct}px` }} />
+                  <div className="flex items-center gap-2">
+                    <div className="h-1.5 w-24 rounded-full bg-neutral-800" />
+                    <div className="h-2.5 w-6 rounded bg-neutral-800/60" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-lg border border-neutral-800/80 bg-neutral-900/40 p-3 text-center">
+            <p className="text-[11px] text-muted leading-relaxed">
+              Animation code is not implemented yet. Sliders will become active once interactive code is connected.
+            </p>
+          </div>
+        </div>
       </aside>
     );
   }

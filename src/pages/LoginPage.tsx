@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Navigate } from 'react-router';
+import { Navigate, useLocation } from 'react-router';
 import { Button } from '../components/ui/Button';
 import { useAuth } from '../features/auth/AuthProvider';
 
@@ -8,6 +8,7 @@ type Mode = 'sign-in' | 'sign-up' | 'forgot';
 export default function LoginPage() {
   const { session, signInWithGoogle, signInWithPassword, signUpWithPassword, resetPassword } =
     useAuth();
+  const location = useLocation();
   const [mode, setMode] = useState<Mode>('sign-in');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -16,7 +17,8 @@ export default function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (session) {
-    return <Navigate to="/hub" replace />;
+    const from = (location.state as { from?: string } | null)?.from;
+    return <Navigate to={from && from !== '/hub' && from !== '/login' ? from : '/editor'} replace />;
   }
 
   async function handleSubmit(e: React.FormEvent) {
