@@ -50,38 +50,40 @@ export function Carousel({ tuning, isPaused }: CarouselProps) {
 
   const cardCount = cards.length || 1;
 
-  const snapStiffness = num(tuning, 'snapStiffness', 180);
-  const snapDamping = num(tuning, 'snapDamping', 27);
-  const swipeSensitivity = num(tuning, 'swipeSensitivity', 0.35);
+  const snapStiffness = num(tuning, 'snapStiffness', 175);
+  const snapDamping = num(tuning, 'snapDamping', 28);
+  const swipeSensitivity = num(tuning, 'swipeSensitivity', 0.2);
   const swipeThreshold = num(tuning, 'swipeThreshold', 36);
-  const symmetricLighting = bool(tuning, 'symmetricLighting', true);
-  const showSymmetryGuides = bool(tuning, 'showSymmetryGuides', false);
+  const symmetricLighting = bool(tuning, 'symmetricLighting', false);
+  const showSymmetryGuides = bool(tuning, 'showSymmetryGuides', true);
 
   const centerPerspective = num(tuning, 'centerPerspective', 1800);
-  const heroLiftY = num(tuning, 'heroLiftY', 46);
-  const heroPopZ = num(tuning, 'heroPopZ', 54);
-  const heroRotY = num(tuning, 'heroRotY', -1);
-  const heroTiltX = num(tuning, 'heroTiltX', -13);
+  const heroLiftY = num(tuning, 'heroLiftY', 92);
+  const heroPopZ = num(tuning, 'heroPopZ', 40);
+  const heroRotY = num(tuning, 'heroRotY', 0);
+  const heroTiltX = num(tuning, 'heroTiltX', 0);
   const heroRotZ = num(tuning, 'heroRotZ', 0);
-  const cardScaleActive = num(tuning, 'cardScaleActive', 1.09);
-  const heroTravelCurve = num(tuning, 'heroTravelCurve', 3.1);
+  const cardScaleActive = num(tuning, 'cardScaleActive', 0.9);
+  const heroTravelCurve = num(tuning, 'heroTravelCurve', 2.5);
 
   const castShadowOnNeighbors = bool(tuning, 'castShadowOnNeighbors', true);
-  const castShadowOpacity = num(tuning, 'castShadowOpacity', 1);
-  const shadowIntensity = num(tuning, 'shadowIntensity', 0.56);
-  const shadowSoftness = num(tuning, 'shadowSoftness', 31);
+  const castShadowOpacity = num(tuning, 'castShadowOpacity', 0.58);
+  const shadowIntensity = num(tuning, 'shadowIntensity', 0.46);
+  const shadowSoftness = num(tuning, 'shadowSoftness', 45);
   const specularSheen = num(tuning, 'specularSheen', 1);
 
-  const fanRadius = num(tuning, 'fanRadius', 210);
-  const fanSpacing = num(tuning, 'fanSpacing', 1);
-  const fanTiltStep = num(tuning, 'fanTiltStep', 0.5);
-  const yawAngle = num(tuning, 'yawAngle', 63);
-  const curveDepth = num(tuning, 'curveDepth', 51);
-  const baseYOffset = num(tuning, 'baseYOffset', 74);
+  const fanRadius = num(tuning, 'fanRadius', 950);
+  const fanSpacing = num(tuning, 'fanSpacing', 180);
+  const fanTiltStep = num(tuning, 'fanTiltStep', 1);
+  const yawAngle = num(tuning, 'yawAngle', 58);
+  const curveDepth = num(tuning, 'curveDepth', 97);
+  const baseYOffset = num(tuning, 'baseYOffset', 98);
 
   const cardOrientation = str(tuning, 'cardOrientation', 'vertical');
   const isVertical = cardOrientation !== 'horizontal';
-  const cardWidth = num(tuning, 'cardWidth', isVertical ? 118 : 240);
+  const cardWidth = num(tuning, 'cardWidth', isVertical ? 208 : 240);
+  const cardHeight = num(tuning, 'cardHeight', isVertical ? 326 : 135);
+  const carouselScale = num(tuning, 'carouselScale', 0.85);
   const perspective = num(tuning, 'perspective', 1900);
   const tiltX = num(tuning, 'tiltX', 35);
 
@@ -90,9 +92,9 @@ export function Carousel({ tuning, isPaused }: CarouselProps) {
   const showPhoneFrame = bool(tuning, 'showPhoneFrame', true);
   const autoRotate = bool(tuning, 'autoRotate', false);
   const autoRotateSpeed = num(tuning, 'autoRotateSpeed', 25);
-  const glowIntensity = num(tuning, 'glowIntensity', 0.8);
+  const glowIntensity = num(tuning, 'glowIntensity', 0);
   const glowColorMode = str(tuning, 'glowColorMode', 'amber');
-  const flankingCount = num(tuning, 'flankingCardsCount', 5);
+  const flankingCount = num(tuning, 'flankingCardsCount', 4);
 
   useEffect(() => {
     haptics.setSoundEnabled(soundEnabled);
@@ -314,10 +316,6 @@ export function Carousel({ tuning, isPaused }: CarouselProps) {
     return currentActiveCard?.accentColor || '#84cc16';
   }, [glowColorMode, currentActiveCard?.accentColor]);
 
-  const cardHeight = isVertical
-    ? Math.round(cardWidth * (1107 / 621))
-    : Math.round(cardWidth * (621 / 1107));
-
   const slotsToRender = useMemo(() => {
     const centerInt = Math.round(progress);
     const slots: number[] = [];
@@ -343,9 +341,11 @@ export function Carousel({ tuning, isPaused }: CarouselProps) {
     const phi = dist * ((fanSpacing * 0.86) / Math.max(R, 80));
     const circleZ = -R * (1 - Math.cos(phi)) * 1.35;
 
-    const wCenterHalf = (cardWidth / 2) * Math.cos(Math.abs(heroRotY) * (Math.PI / 180)) * cardScaleActive;
+    // Use baseline reference width for slot positioning so "Card width" only resizes individual cards
+    const baseSlotWidth = isVertical ? 118 : 240;
+    const wCenterHalf = (baseSlotWidth / 2) * Math.cos(Math.abs(heroRotY) * (Math.PI / 180)) * cardScaleActive;
     const cardScaleBack = isVertical ? 0.9 : 0.9;
-    const wSideHalf = (cardWidth / 2) * Math.cos(Math.abs(yawAngle) * (Math.PI / 180)) * cardScaleBack;
+    const wSideHalf = (baseSlotWidth / 2) * Math.cos(Math.abs(yawAngle) * (Math.PI / 180)) * cardScaleBack;
 
     const spacingCompaction = 1 - heroFactor * 0.35;
     const minSafeGap = 2;
@@ -369,8 +369,6 @@ export function Carousel({ tuning, isPaused }: CarouselProps) {
     const rotY = (1 - heroFactor) * sideRotY + centerYawTarget;
 
     const rotX = (1 - heroFactor) * (tiltX + 1.5) + heroFactor * heroTiltX;
-
-    const currentPerspective = Math.round((1 - heroFactor) * perspective + heroFactor * centerPerspective);
 
     const currentScale = cardScaleBack + (cardScaleActive - cardScaleBack) * heroFactor;
 
@@ -426,7 +424,7 @@ export function Carousel({ tuning, isPaused }: CarouselProps) {
           width: `${cardWidth}px`,
           height: `${cardHeight}px`,
           transformOrigin: isVertical ? '50% 95%' : '50% 50%',
-          transform: `perspective(${currentPerspective}px) translate(-50%, -50%) translate3d(${x.toFixed(2)}px, ${y.toFixed(2)}px, ${z.toFixed(2)}px) rotateX(${rotX.toFixed(2)}deg) rotateY(${rotY.toFixed(2)}deg) rotateZ(${rotZ.toFixed(2)}deg) scale(${currentScale.toFixed(3)})`,
+          transform: `translate(-50%, -50%) translate3d(${x.toFixed(2)}px, ${y.toFixed(2)}px, ${z.toFixed(2)}px) rotateX(${rotX.toFixed(2)}deg) rotateY(${rotY.toFixed(2)}deg) rotateZ(${rotZ.toFixed(2)}deg) scale(${currentScale.toFixed(3)})`,
           transformStyle: 'preserve-3d',
           zIndex,
           opacity: Math.max(0, Math.min(1, opacity)),
@@ -442,7 +440,6 @@ export function Carousel({ tuning, isPaused }: CarouselProps) {
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
             backfaceVisibility: 'hidden',
-            aspectRatio: isVertical ? '621 / 1107' : '1107 / 621',
             boxShadow: cardBoxShadow,
           }}
         >
@@ -469,17 +466,17 @@ export function Carousel({ tuning, isPaused }: CarouselProps) {
   };
 
   const screen = (
-    <div className="relative flex h-full w-full flex-col overflow-hidden select-none">
-      {showPhoneFrame && (
-        <div className="relative z-40 flex w-full shrink-0 items-center justify-between px-7 pt-3 text-[13px] font-semibold text-white select-none">
-          <span>9:41</span>
-          <div className="absolute top-2 left-1/2 h-7 w-[108px] -translate-x-1/2 rounded-full bg-black" />
-          <span className="flex items-center gap-1.5 text-[11px]">
-            5G
-            <span className="h-3 w-6 rounded-[3px] border border-white/70" />
-          </span>
-        </div>
-      )}
+    <div className="relative flex h-full w-full flex-col overflow-hidden select-none bg-black">
+      {/* Background graphic */}
+      <div
+        className="pointer-events-none absolute inset-0 z-0 h-full w-full"
+        style={{
+          backgroundImage: 'url(/animations/infinite-card-carousel/card-bg.png)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center top',
+          backgroundRepeat: 'no-repeat',
+        }}
+      />
 
       {showSymmetryGuides && (
         <div className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center">
@@ -495,18 +492,27 @@ export function Carousel({ tuning, isPaused }: CarouselProps) {
         onPointerCancel={handlePointerUp}
         onWheel={handleWheel}
         className="relative flex h-full w-full flex-1 touch-none items-center justify-center overflow-hidden active:cursor-grabbing"
-        style={{ perspective: `${perspective}px`, perspectiveOrigin: '50% 50%' }}
+        style={{ perspective: `${centerPerspective || perspective}px`, perspectiveOrigin: '50% 50%' }}
       >
         <div
-          className="pointer-events-none absolute bottom-12 left-1/2 h-64 w-80 -translate-x-1/2 rounded-full opacity-85 blur-3xl transition-all duration-300"
+          className="relative flex h-full w-full items-center justify-center"
           style={{
-            background: `radial-gradient(ellipse at center, ${activeGlowColor} 0%, ${activeGlowColor}33 45%, transparent 70%)`,
-            transform: `translateX(-50%) scale(${glowIntensity})`,
+            transform: carouselScale !== 1 ? `scale(${carouselScale})` : undefined,
+            transformOrigin: 'center center',
+            transformStyle: 'preserve-3d',
           }}
-        />
+        >
+          <div
+            className="pointer-events-none absolute bottom-12 left-1/2 h-64 w-80 -translate-x-1/2 rounded-full opacity-85 blur-3xl transition-all duration-300"
+            style={{
+              background: `radial-gradient(ellipse at center, ${activeGlowColor} 0%, ${activeGlowColor}33 45%, transparent 70%)`,
+              transform: `translateX(-50%) scale(${glowIntensity})`,
+            }}
+          />
 
-        <div className="pointer-events-auto relative flex h-full w-full items-center justify-center" style={{ transformStyle: 'preserve-3d' }}>
-          {slotsToRender.map((slotIdx) => renderCardSlot(slotIdx))}
+          <div className="pointer-events-auto relative flex h-full w-full items-center justify-center" style={{ transformStyle: 'preserve-3d' }}>
+            {slotsToRender.map((slotIdx) => renderCardSlot(slotIdx))}
+          </div>
         </div>
       </div>
 
@@ -529,35 +535,50 @@ export function Carousel({ tuning, isPaused }: CarouselProps) {
         </button>
       </div>
 
-      {showPhoneFrame && (
+      {/* {showPhoneFrame && (
         <div className="z-40 flex w-full shrink-0 justify-center pb-2 select-none">
           <div className="h-1 w-28 rounded-full bg-neutral-500/70" />
         </div>
-      )}
+      )} */}
     </div>
   );
 
   if (!showPhoneFrame) return screen;
 
   return (
-    <div className="flex h-full w-full items-center justify-center bg-neutral-950/40">
+    <div className="relative flex h-full w-full items-center justify-center bg-neutral-950/40 select-none p-6">
+      {/* Phone body - Proportional 9:19.5 aspect ratio fitting completely within viewport */}
       <div
-        className="relative flex-shrink-0 bg-neutral-900 shadow-[0_30px_80px_rgba(0,0,0,0.6)]"
-        style={{
-          aspectRatio: '9.5 / 19.5',
-          height: '90%',
-          maxHeight: '100%',
-          maxWidth: '100%',
-          borderRadius: 54,
-          border: '12px solid #1c1c1e',
-        }}
+        id="phone-body"
+        style={{ aspectRatio: '9 / 19.5' }}
+        className="relative h-full max-h-[min(96vh,840px)] w-auto max-w-[412px] shrink-0"
       >
-        {/* Side button nubs */}
-        <div className="absolute top-[108px] -left-[2px] h-16 w-[3px] rounded-l-sm bg-[#1c1c1e]" />
-        <div className="absolute top-[180px] -left-[2px] h-10 w-[3px] rounded-l-sm bg-[#1c1c1e]" />
-        <div className="absolute top-[140px] -right-[2px] h-20 w-[3px] rounded-r-sm bg-[#1c1c1e]" />
+        {/* Screen */}
+        <div
+          id="phone-device-frame"
+          className="absolute inset-0 bg-black flex flex-col overflow-hidden text-white rounded-[54px]"
+        >
+          {screen}
+        </div>
 
-        <div className="relative h-full w-full overflow-hidden rounded-[42px] bg-black">{screen}</div>
+        {/* iPhone 16 hardware frame: bezel, metal edge, Dynamic Island and side buttons */}
+        <div id="iphone-16-frame" aria-hidden="true" className="pointer-events-none absolute inset-0 z-30">
+          {/* Black bezel + aluminium edge, wrapped around the screen */}
+          <div
+            className="absolute -inset-[10px] rounded-[64px] border-[10px] border-black"
+            style={{
+              boxShadow:
+                '0 0 0 1.5px #6b6b70, 0 0 0 3px #2b2b2e, 0 25px 60px rgba(0,0,0,0.85), inset 0 0 0 1px rgba(255,255,255,0.06)',
+            }}
+          />
+          {/* Dynamic Island (124x36pt on a 393x852pt screen) */}
+          <div className="absolute left-1/2 top-[1.3%] h-[4.2%] w-[31.5%] -translate-x-1/2 rounded-full bg-black" />
+          {/* Side buttons: action, volume up, volume down (left) and power (right) */}
+          <div className="absolute -left-[16px] top-[12.5%] h-[3.2%] w-[3px] rounded-l-sm bg-[#3a3a3e]" />
+          <div className="absolute -left-[16px] top-[19%] h-[6.2%] w-[3px] rounded-l-sm bg-[#3a3a3e]" />
+          <div className="absolute -left-[16px] top-[27.5%] h-[6.2%] w-[3px] rounded-l-sm bg-[#3a3a3e]" />
+          <div className="absolute -right-[16px] top-[23%] h-[9.5%] w-[3px] rounded-r-sm bg-[#3a3a3e]" />
+        </div>
       </div>
     </div>
   );

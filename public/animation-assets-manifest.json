@@ -1,5 +1,7 @@
 {
   "infinite-card-carousel": [
+    "/animations/infinite-card-carousel/card-bg.png",
+    "/animations/infinite-card-carousel/cards/.DS_Store",
     "/animations/infinite-card-carousel/cards/POPcard_vertical.png",
     "/animations/infinite-card-carousel/cards/axis_vertical.png",
     "/animations/infinite-card-carousel/cards/hdfc_vertical.png",

@@ -82,42 +82,63 @@ export default function PopBottomNav({ params }: AnimationComponentProps) {
   }
 
   return (
-    <main className="pop-bottom-nav relative flex h-full w-full items-center justify-center p-3 select-none">
-      {/* Decreased frame size with exact 814/1790 aspect ratio to fully fit the POP background */}
+    <main className="pop-bottom-nav relative flex h-full w-full items-center justify-center bg-neutral-950/40 p-6 select-none font-sans">
+      {/* Phone body - Proportional 9:19.5 aspect ratio fitting completely within viewport */}
       <div
-        className="relative flex flex-col items-center justify-between rounded-[48px] border-[10px] border-[#1c1c1e] bg-black shadow-[0_25px_60px_rgba(0,0,0,0.6)] overflow-hidden"
-        style={{
-          aspectRatio: '814 / 1790',
-          height: '84%',
-          maxHeight: '740px',
-          maxWidth: '100%',
-        }}
+        id="phone-body"
+        style={{ aspectRatio: '9 / 19.5' }}
+        className="relative h-full max-h-[min(96vh,840px)] w-auto max-w-[412px] shrink-0"
       >
-        {/* Full-bleed POP Home Page Background - fitted edge-to-edge from top to bottom */}
+        {/* Screen */}
         <div
-          className="absolute inset-0 w-full h-full overflow-hidden select-none pointer-events-none"
-          style={{
-            backgroundImage: 'url(/animations/pop-bottom-nav/pop-home-bg.png)',
-            backgroundSize: '100% 100%',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-          }}
-        />
+          id="phone-device-frame"
+          className="absolute inset-0 bg-black flex flex-col justify-between overflow-hidden text-white rounded-[54px]"
+        >
+          {/* Full-bleed POP Home Page Background - fitted edge-to-edge from top to bottom */}
+          <div
+            className="absolute inset-0 w-full h-full overflow-hidden select-none pointer-events-none"
+            style={{
+              backgroundImage: 'url(/animations/pop-bottom-nav/pop-home-bg.png)',
+              backgroundSize: '100% 100%',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+            }}
+          />
 
-        {/* Minimalist Dynamic Island Pill centered at the top between status indicators */}
-        <div className="absolute top-2.5 left-1/2 -translate-x-1/2 h-5 w-[86px] rounded-full bg-black z-30 pointer-events-none" />
+          {/* Minimalist Dynamic Island Pill centered at the top between status indicators */}
+          <div className="absolute top-2.5 left-1/2 -translate-x-1/2 h-5 w-[86px] rounded-full bg-black z-30 pointer-events-none" />
 
-        {/* Bottom container docking the navigation bar right at the bottom of the background */}
-        <div className="relative z-20 mt-auto w-full px-2.5 pb-2.5 pt-1 flex flex-col items-center justify-end">
-          <div className="w-full flex items-center justify-center">
-            {renderBar(true)}
+          {/* Bottom container docking the navigation bar right at the bottom of the background */}
+          <div className="relative z-20 mt-auto w-full px-2.5 pb-2.5 pt-1 flex flex-col items-center justify-end">
+            <div className="w-full flex items-center justify-center">
+              {renderBar(true)}
+            </div>
+
+            {/* iOS Home indicator bar sitting just below the nav pill */}
+            <div className="mt-0 mb-0.5 h-1 w-28 rounded-full bg-transparent shadow-xs pointer-events-none" />
           </div>
 
-          {/* iOS Home indicator bar sitting just below the nav pill */}
-          <div className="mt-2 mb-0.5 h-1 w-28 rounded-full bg-neutral-400/80 shadow-xs pointer-events-none" />
+          {scannerModal}
         </div>
 
-        {scannerModal}
+        {/* iPhone 16 hardware frame: bezel, metal edge, Dynamic Island and side buttons */}
+        <div id="iphone-16-frame" aria-hidden="true" className="pointer-events-none absolute inset-0 z-30">
+          {/* Black bezel + aluminium edge, wrapped around the screen */}
+          <div
+            className="absolute -inset-[10px] rounded-[64px] border-[10px] border-black"
+            style={{
+              boxShadow:
+                '0 0 0 1.5px #6b6b70, 0 0 0 3px #2b2b2e, 0 25px 60px rgba(0,0,0,0.85), inset 0 0 0 1px rgba(255,255,255,0.06)',
+            }}
+          />
+          {/* Dynamic Island (124x36pt on a 393x852pt screen) */}
+          <div className="absolute left-1/2 top-[1.3%] h-[4.2%] w-[31.5%] -translate-x-1/2 rounded-full bg-black" />
+          {/* Side buttons: action, volume up, volume down (left) and power (right) */}
+          <div className="absolute -left-[16px] top-[12.5%] h-[3.2%] w-[3px] rounded-l-sm bg-[#3a3a3e]" />
+          <div className="absolute -left-[16px] top-[19%] h-[6.2%] w-[3px] rounded-l-sm bg-[#3a3a3e]" />
+          <div className="absolute -left-[16px] top-[27.5%] h-[6.2%] w-[3px] rounded-l-sm bg-[#3a3a3e]" />
+          <div className="absolute -right-[16px] top-[23%] h-[9.5%] w-[3px] rounded-r-sm bg-[#3a3a3e]" />
+        </div>
       </div>
     </main>
   );
