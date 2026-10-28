@@ -516,7 +516,7 @@ export function Carousel({ tuning, isPaused }: CarouselProps) {
         </div>
       </div>
 
-      <div className="absolute bottom-4 left-38 z-30 flex items-center gap-2">
+      <div className="absolute bottom-4 left-39 z-30 flex items-center gap-2">
         <button
           type="button"
           onClick={() => navigateStep(-1)}
