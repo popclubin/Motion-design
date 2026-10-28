@@ -1,8 +1,20 @@
 import type { ParamSchema } from '../_core/params';
 
 const schema: ParamSchema = [
+  { key: 'showDeviceFrame', type: 'toggle', label: 'Show iPhone 16 frame', default: false },
   { key: 'isSlowMo', type: 'toggle', label: 'Slow motion (0.5x)', default: false },
   { key: 'enableCommas', type: 'toggle', label: 'Indian comma grouping', default: true },
+  {
+    key: 'layout',
+    type: 'group',
+    label: 'Layout & Profile',
+    defaultOpen: true,
+    children: [
+      { key: 'contentOffsetY', type: 'slider', label: 'Top content offset', default: 16, min: 0, max: 150, step: 2, unit: 'px' },
+      { key: 'avatarSize', type: 'slider', label: 'Avatar size', default: 36, min: 16, max: 120, step: 2, unit: 'px' },
+      { key: 'avatarNameGap', type: 'slider', label: 'Avatar-name gap', default: 12, min: 0, max: 48, step: 1, unit: 'px' },
+    ],
+  },
   {
     key: 'timing',
     type: 'group',
@@ -53,6 +65,7 @@ const schema: ParamSchema = [
         ],
       },
       { key: 'targetWeight', type: 'slider', label: 'Target weight', default: 400, min: 100, max: 950, step: 50 },
+      { key: 'strokeWidthErosion', type: 'slider', label: 'Stroke width erosion', default: 2.4, min: 0.5, max: 5.0, step: 0.1, unit: 'px' },
       { key: 'digitSpacing', type: 'slider', label: 'Digit spacing', default: 2, min: 0, max: 24, step: 1, unit: 'px' },
     ],
   },

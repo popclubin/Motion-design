@@ -5,6 +5,9 @@ import type { NumberDisplayConfig } from '../types';
 export interface NumberDisplayProps {
   rawNumber: string;
   formattedNumber: string;
+  tokens?: string[];
+  lastAction?: string | null;
+  actionCount?: number;
   isSlowMo: boolean;
   config: NumberDisplayConfig;
 }
@@ -56,6 +59,9 @@ export function getWeightStyle(w: number, isVar: boolean, erosionPx: number = ST
 export const NumberDisplay: React.FC<NumberDisplayProps> = ({
   rawNumber,
   formattedNumber,
+  tokens: _tokens,
+  lastAction,
+  actionCount,
   isSlowMo,
   config,
 }) => {
@@ -89,10 +95,11 @@ export const NumberDisplay: React.FC<NumberDisplayProps> = ({
   const fontClass =
     config.fontMode === 'outfit' ? 'font-outfit' : config.fontMode === 'figtree' ? 'font-figtree' : 'font-custom';
 
-  const w100 = getWeightStyle(100, isVariableFont);
-  const w500 = getWeightStyle(500, isVariableFont);
-  const wPeak = getWeightStyle(Math.min(950, config.targetWeight + 50), isVariableFont);
-  const wTarget = getWeightStyle(config.targetWeight, isVariableFont);
+  const activeErosion = config.strokeWidthErosion ?? 2.4;
+  const w100 = getWeightStyle(100, isVariableFont, activeErosion);
+  const w500 = getWeightStyle(500, isVariableFont, activeErosion);
+  const wPeak = getWeightStyle(Math.min(950, config.targetWeight + 50), isVariableFont, activeErosion);
+  const wTarget = getWeightStyle(config.targetWeight, isVariableFont, activeErosion);
 
   // Synchronize stable unique keys with each character of rawNumber
   if (rawNumber !== prevRawRef.current) {
@@ -164,6 +171,9 @@ export const NumberDisplay: React.FC<NumberDisplayProps> = ({
         key="number-display-amount-row"
         layout
         transition={springTransition}
+        data-raw={rawNumber}
+        data-last-action={lastAction}
+        data-action-count={actionCount}
         className={`relative flex tracking-tight text-white ${fontClass} justify-center ${
           hasAmount ? 'items-start' : 'items-center text-4xl sm:text-5xl md:text-6xl'
         }`}

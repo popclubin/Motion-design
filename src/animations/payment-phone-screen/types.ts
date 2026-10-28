@@ -5,6 +5,11 @@ export interface NumberDisplayConfig {
   digitFontSize: number;
   elementScale: number;
   initialScale: number;
+  strokeWidthErosion: number;
+  contentOffsetY: number;
+  avatarNameGap: number;
+  avatarSize: number;
+  showDeviceFrame: boolean;
   speedIn: number;
   speedOut: number;
   springStiffness: number;

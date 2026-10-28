@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ChevronLeft, Delete, Link2, Play } from 'lucide-react';
+import { ChevronLeft, Delete, Play } from 'lucide-react';
 import { usePlayback } from '../_core/usePlayback';
 import type { AnimationComponentProps } from '../../types/animation';
 import type { NumberDisplayConfig } from './types';
@@ -61,6 +61,7 @@ export default function PaymentPhoneScreen({ params }: AnimationComponentProps) 
   const isSlowMo = Boolean(params.isSlowMo ?? false);
   const enableCommas = Boolean(params.enableCommas ?? true);
   const autoTypeInterval = Number(params.autoTypeInterval ?? 340);
+  const showDeviceFrame = Boolean(params.showDeviceFrame ?? false);
 
   const displayConfig: NumberDisplayConfig = {
     fontMode: (params.fontMode as NumberDisplayConfig['fontMode']) ?? 'custom',
@@ -69,6 +70,11 @@ export default function PaymentPhoneScreen({ params }: AnimationComponentProps) 
     digitFontSize: Number(params.digitFontSize ?? 64),
     elementScale: Number(params.elementScale ?? 1.0),
     initialScale: Number(params.initialScale ?? 0.3),
+    strokeWidthErosion: Number(params.strokeWidthErosion ?? 2.4),
+    contentOffsetY: Number(params.contentOffsetY ?? 16),
+    avatarNameGap: Number(params.avatarNameGap ?? 12),
+    avatarSize: Number(params.avatarSize ?? 36),
+    showDeviceFrame,
     speedIn: Number(params.speedIn ?? 0.3),
     speedOut: Number(params.speedOut ?? 0.15),
     springStiffness: Number(params.springStiffness ?? 540),
@@ -86,17 +92,25 @@ export default function PaymentPhoneScreen({ params }: AnimationComponentProps) 
   };
 
   const [rawNumber, setRawNumber] = useState('');
+  const [lastAction, setLastAction] = useState<string | null>(null);
+  const [actionCount, setActionCount] = useState<number>(0);
+  const [displayResetKey, setDisplayResetKey] = useState<number>(0);
   const lastDemoRef = useRef<number | undefined>(undefined);
+  const demoTimeoutsRef = useRef<number[]>([]);
 
   const handleKeyInput = useCallback((key: string) => {
     setRawNumber((prev) => {
       if (key === 'backspace') {
+        setLastAction('Backspace');
+        setActionCount((c) => c + 1);
         if (prev.length <= 1) return '';
         return prev.slice(0, -1);
       }
 
       if (key === '.') {
         if (prev.includes('.')) return prev;
+        setLastAction('.');
+        setActionCount((c) => c + 1);
         return prev === '' ? '0.' : prev + '.';
       }
 
@@ -110,8 +124,14 @@ export default function PaymentPhoneScreen({ params }: AnimationComponentProps) 
         }
 
         if (prev === '0' && key === '0') return prev;
-        if (prev === '0' && key !== '.') return key;
+        if (prev === '0' && key !== '.') {
+          setLastAction(key);
+          setActionCount((c) => c + 1);
+          return key;
+        }
 
+        setLastAction(key);
+        setActionCount((c) => c + 1);
         return prev + key;
       }
 
@@ -120,10 +140,18 @@ export default function PaymentPhoneScreen({ params }: AnimationComponentProps) 
   }, []);
 
   const playDemoSequence = useCallback(() => {
+    demoTimeoutsRef.current.forEach((id) => window.clearTimeout(id));
+    demoTimeoutsRef.current = [];
     setRawNumber('');
+    setLastAction(null);
+    setDisplayResetKey((k) => k + 1);
+
     const demoSequence = ['5', '5', '6', '5'];
     demoSequence.forEach((k, idx) => {
-      setTimeout(() => handleKeyInput(k), (idx + 1) * autoTypeInterval);
+      const id = window.setTimeout(() => {
+        handleKeyInput(k);
+      }, (idx + 1) * autoTypeInterval);
+      demoTimeoutsRef.current.push(id);
     });
   }, [handleKeyInput, autoTypeInterval]);
 
@@ -158,75 +186,111 @@ export default function PaymentPhoneScreen({ params }: AnimationComponentProps) 
   }, [handleKeyInput, isPaused]);
 
   const formattedNumber = enableCommas ? formatIndianCurrency(rawNumber) : rawNumber;
+  const tokens = formattedNumber ? formattedNumber.split('') : [];
 
   return (
-    <div className="payment-phone-screen relative flex h-full w-full items-center justify-center bg-neutral-950/40 select-none">
-      {/* Device bezel matching the infinite-card-carousel phone frame */}
+    <div
+      className={`payment-phone-screen relative flex h-full w-full items-center justify-center bg-neutral-950/40 select-none font-sans ${
+        showDeviceFrame ? 'p-6' : 'p-2 sm:p-4'
+      }`}
+    >
+      {/* Phone body - Proportional 9:19.5 aspect ratio fitting completely within viewport */}
       <div
-        className="relative flex-shrink-0 bg-neutral-900 shadow-[0_30px_80px_rgba(0,0,0,0.6)]"
-        style={{ aspectRatio: '9.5 / 19.5', height: '90%', maxHeight: '100%', maxWidth: '100%', borderRadius: 54, border: '12px solid #1c1c1e' }}
+        id="phone-body"
+        style={{ aspectRatio: '9 / 19.5' }}
+        className="relative h-full max-h-[min(96vh,840px)] w-auto max-w-[412px] shrink-0"
       >
-        <div className="absolute top-[108px] -left-[2px] h-16 w-[3px] rounded-l-sm bg-[#1c1c1e]" />
-        <div className="absolute top-[180px] -left-[2px] h-10 w-[3px] rounded-l-sm bg-[#1c1c1e]" />
-        <div className="absolute top-[140px] -right-[2px] h-20 w-[3px] rounded-r-sm bg-[#1c1c1e]" />
+        {/* Screen */}
+        <div
+          id="phone-device-frame"
+          className={`absolute inset-0 bg-black flex flex-col overflow-hidden text-white ${
+            showDeviceFrame
+              ? 'rounded-[54px]'
+              : 'rounded-[32px] sm:rounded-[44px] ring-1 ring-white/10 shadow-[0_25px_60px_rgba(0,0,0,0.85)]'
+          }`}
+          style={{ paddingTop: displayConfig.contentOffsetY + (showDeviceFrame ? 12 : 0) }}
+        >
+          {/* Hardcoded background image from Amount input.png */}
+          <div
+            id="visual-dome-background"
+            className="absolute inset-0 pointer-events-none bg-cover bg-center bg-no-repeat"
+            style={{ backgroundImage: "url('/animations/payment-phone-screen/Amount%20input.png')" }}
+          />
 
-        <div className="relative flex h-full w-full flex-col overflow-hidden rounded-[42px] bg-black text-white">
-          {/* Status bar, matching the infinite-card-carousel screen chrome */}
-          <div className="relative z-40 flex w-full shrink-0 items-center justify-between px-7 pt-3 text-[13px] font-semibold text-white select-none">
-            <span>9:41</span>
-            <div className="absolute top-2 left-1/2 h-7 w-[108px] -translate-x-1/2 rounded-full bg-black" />
-            <span className="flex items-center gap-1.5 text-[11px]">
-              5G
-              <span className="h-3 w-6 rounded-[3px] border border-white/70" />
-            </span>
-          </div>
-
-          {/* Glowing dome backdrop */}
-          <div className="absolute top-0 left-0 right-0 h-[52%] pointer-events-none overflow-hidden">
-            <div
-              className="absolute -top-[35%] -left-[25%] -right-[25%] h-[105%] rounded-full"
-              style={{
-                background:
-                  'radial-gradient(ellipse at 50% 65%, rgba(225, 75, 12, 0.95) 0%, rgba(195, 55, 8, 0.75) 45%, rgba(120, 30, 5, 0.3) 72%, rgba(0, 0, 0, 0) 100%)',
-                filter: 'blur(8px)',
-              }}
-            />
-            <div
-              className="absolute top-[22%] left-[7%] right-[7%] h-[82%] rounded-full bg-black"
-              style={{ boxShadow: '0 -15px 35px 5px rgba(240, 85, 20, 0.45)' }}
-            />
-            <div
-              className="absolute inset-0"
-              style={{ background: 'radial-gradient(circle at 50% 18%, rgba(255, 100, 30, 0.25) 0%, transparent 60%)' }}
-            />
-          </div>
-
-          <div className="relative z-10 flex items-center justify-between px-3.5 pt-2 pb-0 shrink-0">
-            <button type="button" aria-label="Back" className="text-white/90 hover:text-white p-1 -ml-1 rounded-full active:scale-95 transition-transform">
-              <ChevronLeft className="w-5 h-5 stroke-[2.2]" />
+          {/* Top Header with Back Navigation Arrow */}
+          <div
+            id="phone-header"
+            className="relative z-10 flex items-center justify-between px-3.5 sm:px-4 pt-3 sm:pt-4 pb-0 shrink-0"
+          >
+            <button
+              id="btn-back"
+              type="button"
+              aria-label="Back"
+              className="relative top-2 text-white/90 hover:text-white p-1 -ml-1 rounded-full active:scale-95 transition-transform cursor-pointer"
+            >
+              <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2.2]" />
             </button>
           </div>
 
-          <div className="relative z-10 flex flex-col items-center pt-0 pb-0 shrink-0">
-            <div className="w-13 h-13 sm:w-16 sm:h-16 rounded-full bg-gradient-to-br from-[#7e1cc6] via-[#6515a8] to-[#45097a] flex items-center justify-center shadow-lg border border-purple-400/20">
-              <span className="text-white font-semibold text-lg sm:text-2xl tracking-wide">HK</span>
+          {/* Recipient Profile Section */}
+          <div
+            id="recipient-section"
+            className="relative z-10 flex flex-col items-center pt-0 sm:pt-1 pb-0 shrink-0"
+          >
+            {/* Avatar with purple gradient and initials */}
+            <div
+              id="recipient-avatar"
+              style={{ width: displayConfig.avatarSize, height: displayConfig.avatarSize }}
+              className="rounded-full bg-gradient-to-br from-[#7e1cc6] via-[#6515a8] to-[#45097a] flex items-center justify-center shadow-lg border border-purple-400/20 shrink-0"
+            >
+              <span
+                style={{ fontSize: displayConfig.avatarSize * 0.4 }}
+                className="text-white font-semibold tracking-wide leading-none"
+              >
+                DS
+              </span>
             </div>
-            <h1 className="mt-2 text-white font-medium text-base sm:text-lg tracking-tight leading-snug">Harsh</h1>
-            <p className="mt-0.5 text-white/60 text-xs sm:text-[13px] font-normal tracking-tight">harsh@oksbi</p>
+
+            {/* Recipient Name */}
+            <h1
+              id="recipient-name"
+              style={{ marginTop: displayConfig.avatarNameGap }}
+              className="text-white font-medium text-base sm:text-lg md:text-[19px] tracking-tight leading-snug"
+            >
+              Deepanshi Sharma
+            </h1>
+
+            {/* UPI ID */}
+            <p
+              id="recipient-upi"
+              className="mt-0.5 text-white/60 text-xs sm:text-[13px] font-normal tracking-tight"
+            >
+              deepanshi@oksbi
+            </p>
           </div>
 
-          <div className="relative z-10 flex flex-col items-center justify-center mt-3 mb-auto py-0 shrink-0 overflow-visible">
+          {/* Number Display Section */}
+          <div
+            id="number-display-section"
+            className="relative z-10 flex flex-col items-center justify-center mt-3 sm:mt-4.5 mb-auto py-0 shrink-0 overflow-visible"
+          >
             <NumberDisplay
+              key={displayResetKey}
               rawNumber={rawNumber}
               formattedNumber={formattedNumber}
+              tokens={tokens}
+              lastAction={lastAction}
+              actionCount={actionCount}
               isSlowMo={isSlowMo}
               config={displayConfig}
             />
 
-            <div className="flex items-center gap-2 mt-2">
+            {/* Action button: Add a note & Demo */}
+            <div className="flex items-center gap-2 mt-2 sm:mt-2.5">
               <button
+                id="btn-add-note"
                 type="button"
-                className="px-3 py-1 rounded-lg bg-[#19191d] hover:bg-[#222228] text-white/50 hover:text-white/70 text-xs font-normal transition-colors border border-white/5"
+                className="px-3 sm:px-4 py-1 sm:py-1.5 rounded-lg bg-[#19191d] hover:bg-[#222228] text-white/50 hover:text-white/70 text-xs sm:text-[13px] font-normal transition-colors border border-white/5 cursor-pointer"
               >
                 Add a note
               </button>
@@ -234,7 +298,7 @@ export default function PaymentPhoneScreen({ params }: AnimationComponentProps) 
                 type="button"
                 onClick={playDemoSequence}
                 title="Replay the 5565 demo sequence"
-                className="px-2.5 py-1 rounded-lg bg-orange-500/15 hover:bg-orange-500/25 text-orange-400 hover:text-orange-300 text-xs font-medium transition-colors border border-orange-500/20 flex items-center gap-1 active:scale-95"
+                className="px-2.5 py-1 rounded-lg bg-orange-500/15 hover:bg-orange-500/25 text-orange-400 hover:text-orange-300 text-xs font-medium transition-colors border border-orange-500/20 flex items-center gap-1 active:scale-95 cursor-pointer"
               >
                 <Play className="w-3 h-3 fill-current" />
                 Demo
@@ -242,40 +306,74 @@ export default function PaymentPhoneScreen({ params }: AnimationComponentProps) 
             </div>
           </div>
 
-          <div className="relative z-10 w-full px-4 sm:px-6 pb-2 mt-auto shrink-0 select-none">
-            <div className="grid grid-cols-3 gap-y-1.5 gap-x-2 max-w-[340px] mx-auto">
+          {/* Keypad Section */}
+          <div
+            id="keypad-section"
+            style={{ containerType: 'inline-size' }}
+            className="relative z-10 w-full mt-auto shrink-0 select-none"
+          >
+            <div className="grid grid-cols-3 gap-[1.02cqw] px-[3.05cqw] pb-[10.2cqw]">
               {KEYPAD_KEYS.map((key) => {
                 const isBackspace = key === 'backspace';
                 const isDot = key === '.';
+                const hasFill = !isBackspace && !isDot;
+
                 return (
                   <button
                     key={key}
+                    id={`keypad-btn-${key}`}
                     type="button"
                     onClick={() => handleKeyInput(key)}
-                    className="flex items-center justify-center h-12 sm:h-14 rounded-full active:bg-white/10 active:scale-95 transition-all text-white font-medium select-none focus:outline-none"
+                    style={{ height: '14.25cqw', borderRadius: '4.07cqw' }}
+                    className={`flex items-center justify-center transition-all select-none focus:outline-none active:scale-95 cursor-pointer ${
+                      hasFill ? 'bg-[#1A1A1A] active:bg-[#262626]' : 'bg-transparent active:bg-[#1A1A1A]'
+                    }`}
                   >
                     {isBackspace ? (
-                      <Delete className="w-5 h-5 stroke-[1.8] text-white/80" />
+                      <Delete
+                        style={{ width: '5.6cqw', height: '5.6cqw' }}
+                        className="stroke-[2] text-[#E8E8E8]"
+                      />
                     ) : isDot ? (
-                      <span className="text-2xl sm:text-3xl font-bold leading-none mb-1 text-white/90">.</span>
+                      <span
+                        style={{ width: '1.63cqw', height: '1.63cqw' }}
+                        className="rounded-full bg-[#E8E8E8]"
+                      />
                     ) : (
-                      <span className="text-xl sm:text-2xl font-normal text-white">{key}</span>
+                      <span
+                        style={{ fontSize: '6.1cqw', lineHeight: 1 }}
+                        className="font-figtree font-medium text-[#E8E8E8]"
+                      >
+                        {key}
+                      </span>
                     )}
                   </button>
                 );
               })}
             </div>
           </div>
-
-          <div className="relative z-10 flex items-center justify-center gap-1.5 text-white/40 text-[10px] py-2 pb-3 shrink-0">
-            <span>Banking Name: Harshwardhan K</span>
-            <Link2 className="w-3 h-3 stroke-[2]" />
-          </div>
-
-          <div className="z-40 flex w-full shrink-0 justify-center pb-2 select-none">
-            <div className="h-1 w-28 rounded-full bg-neutral-500/70" />
-          </div>
         </div>
+
+        {/* iPhone 16 hardware frame: bezel, metal edge, Dynamic Island and side buttons */}
+        {showDeviceFrame && (
+          <div id="iphone-16-frame" aria-hidden="true" className="pointer-events-none absolute inset-0 z-30">
+            {/* Black bezel + aluminium edge, wrapped around the screen */}
+            <div
+              className="absolute -inset-[10px] rounded-[64px] border-[10px] border-black"
+              style={{
+                boxShadow:
+                  '0 0 0 1.5px #6b6b70, 0 0 0 3px #2b2b2e, 0 25px 60px rgba(0,0,0,0.85), inset 0 0 0 1px rgba(255,255,255,0.06)',
+              }}
+            />
+            {/* Dynamic Island (124x36pt on a 393x852pt screen) */}
+            <div className="absolute left-1/2 top-[1.3%] h-[4.2%] w-[31.5%] -translate-x-1/2 rounded-full bg-black" />
+            {/* Side buttons: action, volume up, volume down (left) and power (right) */}
+            <div className="absolute -left-[16px] top-[12.5%] h-[3.2%] w-[3px] rounded-l-sm bg-[#3a3a3e]" />
+            <div className="absolute -left-[16px] top-[19%] h-[6.2%] w-[3px] rounded-l-sm bg-[#3a3a3e]" />
+            <div className="absolute -left-[16px] top-[27.5%] h-[6.2%] w-[3px] rounded-l-sm bg-[#3a3a3e]" />
+            <div className="absolute -right-[16px] top-[23%] h-[9.5%] w-[3px] rounded-r-sm bg-[#3a3a3e]" />
+          </div>
+        )}
       </div>
     </div>
   );
